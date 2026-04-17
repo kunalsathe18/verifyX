@@ -1,0 +1,13 @@
+# Rust build output
+contract/target/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment variables – never commit secrets
+frontend/.env
+
+# OS
+.DS_Store
+Thumbs.db
