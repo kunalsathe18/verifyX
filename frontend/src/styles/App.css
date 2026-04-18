@@ -1,6 +1,7 @@
 /* ============================================================
-   App.css – verifyX global styles
-   Plain CSS, no frameworks. Clean, minimal, card-based layout.
+   App.css – verifyX
+   Mobile-first responsive styles
+   Breakpoints: 480px (xs) · 720px (md) · 1100px (lg)
    ============================================================ */
 
 /* ── Reset & base ── */
@@ -11,7 +12,6 @@
 }
 
 :root {
-  /* Color palette */
   --color-bg:          #0f1117;
   --color-surface:     #1a1d27;
   --color-surface-2:   #22263a;
@@ -24,13 +24,10 @@
   --color-muted:       #8b90b0;
   --color-success:     #00c9a7;
   --color-error:       #ff5c7a;
-  --color-warning:     #ffc107;
 
-  /* Typography */
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  /* Spacing */
   --radius:    12px;
   --radius-sm: 6px;
   --shadow:    0 4px 24px rgba(0, 0, 0, 0.4);
@@ -39,6 +36,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* Prevent font size inflation on iOS */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -47,15 +46,15 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
 }
 
 a {
   color: var(--color-primary);
   text-decoration: none;
 }
-a:hover {
-  text-decoration: underline;
-}
+a:hover { text-decoration: underline; }
 
 /* ── Layout ── */
 .app {
@@ -66,17 +65,24 @@ a:hover {
 
 .main {
   flex: 1;
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-  width: 100%;
+  /* More breathing room on mobile */
+  padding: 1.25rem 1rem 3rem;
+}
+
+@media (min-width: 720px) {
+  .main {
+    padding: 2rem 1.5rem 4rem;
+  }
 }
 
 /* ── Header ── */
 .header {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -88,52 +94,67 @@ a:hover {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
 }
 
+/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
-.logo-icon {
-  font-size: 1.6rem;
-}
+.logo-icon { font-size: 1.4rem; }
 
 .logo-text {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-primary);
   letter-spacing: -0.5px;
 }
 
+/* Hide tagline on small screens — not enough room */
 .logo-tagline {
+  display: none;
   font-size: 0.8rem;
   color: var(--color-muted);
-  flex: 1;
+}
+
+@media (min-width: 720px) {
+  .logo-tagline {
+    display: block;
+    flex: 1;
+  }
+  .header {
+    padding: 1rem 1.5rem;
+  }
+  .logo-icon { font-size: 1.6rem; }
+  .logo-text  { font-size: 1.4rem; }
 }
 
 /* ── Wallet bar ── */
 .wallet-bar {
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .wallet-connected {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  padding: 0.4rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .wallet-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--color-success);
   box-shadow: 0 0 6px var(--color-success);
@@ -141,13 +162,19 @@ a:hover {
 }
 
 .wallet-label {
+  /* Hide "Connected:" label on very small screens */
+  display: none;
   color: var(--color-muted);
+}
+
+@media (min-width: 480px) {
+  .wallet-label { display: inline; }
 }
 
 .wallet-address {
   font-family: var(--font-mono);
   color: var(--color-secondary);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 .wallet-disconnected {
@@ -160,22 +187,24 @@ a:hover {
 /* ── Hero ── */
 .hero {
   text-align: center;
-  padding: 3rem 1rem 2.5rem;
+  padding: 2rem 0.5rem 1.75rem;
+}
+
+@media (min-width: 720px) {
+  .hero { padding: 3rem 1rem 2.5rem; }
 }
 
 .hero-title {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: clamp(1.5rem, 5vw, 2.8rem);
   font-weight: 800;
   line-height: 1.2;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.highlight {
-  color: var(--color-primary);
-}
+.highlight { color: var(--color-primary); }
 
 .hero-subtitle {
-  font-size: 1.05rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.05rem);
   color: var(--color-muted);
   max-width: 560px;
   margin: 0 auto;
@@ -184,14 +213,17 @@ a:hover {
 /* ── Cards grid ── */
 .cards-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  /* Single column on mobile, two on tablet+ */
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
 }
 
-@media (max-width: 720px) {
+@media (min-width: 720px) {
   .cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
   }
 }
 
@@ -200,20 +232,24 @@ a:hover {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1.75rem;
+  padding: 1.25rem;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
+}
+
+@media (min-width: 720px) {
+  .card { padding: 1.75rem; gap: 1rem; }
 }
 
 .card-title {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
 .card-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--color-muted);
   line-height: 1.5;
 }
@@ -222,7 +258,7 @@ a:hover {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
 .form-group {
@@ -232,7 +268,7 @@ a:hover {
 }
 
 .form-group label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-muted);
   text-transform: uppercase;
@@ -244,11 +280,15 @@ a:hover {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text);
-  font-size: 0.95rem;
-  padding: 0.65rem 0.9rem;
+  /* 16px prevents iOS auto-zoom on focus */
+  font-size: 1rem;
+  padding: 0.7rem 0.9rem;
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
+  /* Remove iOS inner shadow */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-group input:focus {
@@ -272,51 +312,48 @@ a:hover {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
-  padding: 0.7rem 1.4rem;
+  /* Tall enough for comfortable tap targets (min 44px) */
+  padding: 0.8rem 1.4rem;
+  min-height: 44px;
   transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
   width: 100%;
+  /* Prevent text selection on double-tap */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn:active {
-  transform: scale(0.98);
-}
+.btn:active { transform: scale(0.98); }
 
 .btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-/* Primary – purple */
 .btn-primary {
   background: var(--color-primary);
   color: #fff;
 }
-
 .btn-primary:hover:not(:disabled) {
   background: var(--color-primary-h);
   box-shadow: 0 4px 16px rgba(108, 99, 255, 0.4);
 }
 
-/* Secondary – teal */
 .btn-secondary {
   background: var(--color-secondary);
   color: #0f1117;
 }
-
 .btn-secondary:hover:not(:disabled) {
   background: var(--color-secondary-h);
   box-shadow: 0 4px 16px rgba(0, 201, 167, 0.35);
 }
 
-/* Outline */
 .btn-outline {
   background: transparent;
   border: 1.5px solid var(--color-primary);
   color: var(--color-primary);
 }
-
 .btn-outline:hover:not(:disabled) {
   background: rgba(108, 99, 255, 0.1);
 }
@@ -324,9 +361,10 @@ a:hover {
 /* ── Status boxes ── */
 .status-box {
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   padding: 0.75rem 1rem;
   line-height: 1.5;
+  word-break: break-word;
 }
 
 .status-box.success {
@@ -344,7 +382,7 @@ a:hover {
 /* ── Result card ── */
 .result-card {
   border-radius: var(--radius-sm);
-  padding: 1.25rem;
+  padding: 1rem;
   margin-top: 0.5rem;
 }
 
@@ -361,21 +399,17 @@ a:hover {
 .result-badge {
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
-.genuine-badge {
-  color: var(--color-success);
-}
+.genuine-badge { color: var(--color-success); }
+.fake-badge    { color: var(--color-error); }
 
-.fake-badge {
-  color: var(--color-error);
-}
-
+/* Stack table rows on mobile for readability */
 .result-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .result-table tr + tr td {
@@ -386,21 +420,24 @@ a:hover {
   color: var(--color-muted);
   padding: 0.45rem 0.5rem 0.45rem 0;
   white-space: nowrap;
-  width: 40%;
-  font-size: 0.82rem;
+  width: 38%;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  vertical-align: top;
 }
 
 .result-value {
   color: var(--color-text);
   padding: 0.45rem 0;
   font-weight: 500;
+  /* Long addresses wrap instead of overflow */
+  word-break: break-all;
 }
 
 .result-value.address {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--color-secondary);
 }
 
@@ -409,13 +446,14 @@ a:hover {
   border: 1px solid rgba(0, 201, 167, 0.4);
   border-radius: 999px;
   color: var(--color-success);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   padding: 0.2rem 0.7rem;
+  display: inline-block;
 }
 
 .fake-message {
   color: var(--color-error);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.5;
 }
 
@@ -434,11 +472,15 @@ a:hover {
 /* ── How it works ── */
 .how-it-works {
   text-align: center;
-  padding: 2rem 0;
+  padding: 1.5rem 0 2rem;
+}
+
+@media (min-width: 720px) {
+  .how-it-works { padding: 2rem 0; }
 }
 
 .how-it-works h2 {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   color: var(--color-muted);
@@ -447,66 +489,76 @@ a:hover {
 }
 
 .steps {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  /* 2-column grid on mobile, single row on desktop */
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Hide arrows — they don't make sense in a grid */
+.step-arrow { display: none; }
+
+@media (min-width: 720px) {
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .step-arrow {
+    display: block;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
 }
 
 .step {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  max-width: 160px;
+  padding: 0.9rem 0.75rem;
   text-align: center;
+}
+
+@media (min-width: 720px) {
+  .step {
+    padding: 1rem 1.25rem;
+    max-width: 160px;
+  }
 }
 
 .step-number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   background: var(--color-primary);
   border-radius: 50%;
   color: #fff;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin-bottom: 0.5rem;
 }
 
 .step p {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--color-muted);
   line-height: 1.4;
-}
-
-.step-arrow {
-  color: var(--color-muted);
-  font-size: 1.2rem;
-}
-
-@media (max-width: 600px) {
-  .step-arrow {
-    display: none;
-  }
-  .steps {
-    gap: 0.5rem;
-  }
 }
 
 /* ── Footer ── */
 .footer {
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
-  padding: 1.25rem;
+  padding: 1rem;
   text-align: center;
   font-size: 0.82rem;
   color: var(--color-muted);
 }
 
-.footer a {
-  color: var(--color-primary);
-}
+.footer a { color: var(--color-primary); }
