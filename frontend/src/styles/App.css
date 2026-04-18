@@ -562,3 +562,109 @@ a:hover { text-decoration: underline; }
 }
 
 .footer a { color: var(--color-primary); }
+
+/* ── Network warning banner ── */
+.network-banner {
+  background: rgba(255, 193, 7, 0.12);
+  border-bottom: 1px solid rgba(255, 193, 7, 0.4);
+  color: #ffc107;
+  font-size: 0.85rem;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ── Spinner ── */
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner-dark {
+  border-color: rgba(15, 17, 23, 0.3);
+  border-top-color: #0f1117;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Copyable Product ID row ── */
+.product-id-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.product-id-label {
+  font-size: 0.82rem;
+  color: var(--color-success);
+  opacity: 0.8;
+}
+
+.product-id-value {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-success);
+  letter-spacing: 0.05em;
+}
+
+.copy-btn {
+  background: rgba(0, 201, 167, 0.15);
+  border: 1px solid rgba(0, 201, 167, 0.4);
+  border-radius: var(--radius-sm);
+  color: var(--color-success);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  transition: background 0.15s;
+  white-space: nowrap;
+  min-height: 28px;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 201, 167, 0.25);
+}
+
+.product-id-hint {
+  font-size: 0.78rem;
+  color: var(--color-success);
+  opacity: 0.7;
+  margin-top: 0.3rem;
+  width: 100%;
+}
+
+/* ── Reset / verify another button ── */
+.btn-reset {
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  margin-top: 0.9rem;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: block;
+}
+
+.btn-reset:hover {
+  color: var(--color-text);
+}

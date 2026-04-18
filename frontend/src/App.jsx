@@ -1,22 +1,18 @@
-// ============================================================
-// App.jsx
-// Root component – assembles the full verifyX UI.
-// Layout: Header → WalletConnect → AddProduct → VerifyProduct
-// ============================================================
-
 import React, { useState } from "react";
 import WalletConnect from "./components/WalletConnect";
 import AddProduct from "./components/AddProduct";
 import VerifyProduct from "./components/VerifyProduct";
+import NetworkBanner from "./components/NetworkBanner";
 
 export default function App() {
-  // walletAddress is shared between AddProduct (needs it to sign)
-  // and the header display.
   const [walletAddress, setWalletAddress] = useState(null);
 
   return (
     <div className="app">
-      {/* ── Header ── */}
+      {/* Network warning — shown if Freighter is on mainnet */}
+      <NetworkBanner />
+
+      {/* Header */}
       <header className="header">
         <div className="header-inner">
           <div className="logo">
@@ -24,14 +20,12 @@ export default function App() {
             <span className="logo-text">verifyX</span>
           </div>
           <p className="logo-tagline">Product Authenticity on the Blockchain</p>
-          {/* Wallet connect lives in the header */}
           <WalletConnect onConnect={setWalletAddress} />
         </div>
       </header>
 
-      {/* ── Main content ── */}
+      {/* Main */}
       <main className="main">
-        {/* Hero banner */}
         <section className="hero">
           <h1 className="hero-title">
             Is your product <span className="highlight">genuine</span>?
@@ -42,16 +36,11 @@ export default function App() {
           </p>
         </section>
 
-        {/* Two-column card layout */}
         <div className="cards-grid">
-          {/* Left: register */}
           <AddProduct walletAddress={walletAddress} />
-
-          {/* Right: verify */}
           <VerifyProduct />
         </div>
 
-        {/* How it works */}
         <section className="how-it-works">
           <h2>How it works</h2>
           <div className="steps">
@@ -78,23 +67,15 @@ export default function App() {
         </section>
       </main>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <footer className="footer">
         <p>
           Built on{" "}
-          <a
-            href="https://stellar.org"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://stellar.org" target="_blank" rel="noreferrer">
             Stellar
           </a>{" "}
           with{" "}
-          <a
-            href="https://soroban.stellar.org"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://soroban.stellar.org" target="_blank" rel="noreferrer">
             Soroban
           </a>{" "}
           · verifyX
