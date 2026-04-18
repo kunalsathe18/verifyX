@@ -99,6 +99,13 @@ a:hover { text-decoration: underline; }
   flex-wrap: nowrap;
 }
 
+@media (min-width: 720px) {
+  .header-inner {
+    max-width: 100%;
+    margin: 0;
+  }
+}
+
 /* ── Logo ── */
 .logo {
   display: flex;
