@@ -44,6 +44,20 @@ verifyX/
 
 ---
 
+## Deployed Contract
+
+| | Value |
+|---|---|
+| **Network** | Stellar Testnet |
+| **Contract ID** | `CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW` |
+| **Explorer** | [View on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW) |
+
+> This is the **second deployment** — the contract was intentionally redeployed after the initial deployment to demonstrate the full deploy lifecycle.
+>
+> Previous contract ID (revoked): `CBZFP5LCW7SCY5XOD5KMITXEMAJSUC3KNN3THM7OUEP2D6JIJSFRGLXI`
+
+---
+
 ## Prerequisites
 
 - [Rust](https://rustup.rs) (stable)

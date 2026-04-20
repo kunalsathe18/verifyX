@@ -1,6 +1,6 @@
 // ============================================================
 // contract.js  –  verifyX
-// @stellar/stellar-sdk v13  (protocol 21)
+// @stellar/stellar-sdk v13  ·  @stellar/freighter-api v3
 // ============================================================
 
 import {
@@ -15,7 +15,7 @@ import {
   rpc,
 } from "@stellar/stellar-sdk";
 
-import { signTransaction } from "@stellar/freighter-api";
+import { signTx, TESTNET_PASSPHRASE } from "./freighter";
 
 // ─────────────────────────────────────────────
 // Config
@@ -23,31 +23,34 @@ import { signTransaction } from "@stellar/freighter-api";
 export const CONTRACT_ID =
   import.meta.env.VITE_CONTRACT_ID || "YOUR_CONTRACT_ID_HERE";
 
-export const NETWORK_PASSPHRASE = Networks.TESTNET;
+export const NETWORK_PASSPHRASE = Networks.TESTNET; // same as TESTNET_PASSPHRASE
 
 const RPC_URL =
   import.meta.env.VITE_RPC_URL || "https://soroban-testnet.stellar.org";
 
 const server = new rpc.Server(RPC_URL, { allowHttp: false });
 
+// Well-known Stellar account used for read-only simulations (no auth needed).
+// Instantiated lazily inside functions to avoid module-load validation errors.
+const DUMMY_ADDRESS = "GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN";
+function dummyAccount() {
+  return new Account(DUMMY_ADDRESS, "0");
+}
+
 // ─────────────────────────────────────────────
-// toXdrBase64  –  helper
-// TransactionBuilder.toXDR() returns a Buffer in browser
-// environments. Freighter needs a base64 string.
+// toXdrBase64  –  Freighter needs a base64 string
 // ─────────────────────────────────────────────
 function toXdrBase64(tx) {
   const raw = tx.toXDR();
-  // If it's already a string, return as-is
   if (typeof raw === "string") return raw;
-  // Convert Buffer / Uint8Array → base64 string
   return btoa(String.fromCharCode(...new Uint8Array(raw)));
 }
 
 // ─────────────────────────────────────────────
-// buildAndSubmit  –  internal helper
+// buildAndSubmit  –  build → simulate → sign → submit → poll
 // ─────────────────────────────────────────────
 async function buildAndSubmit(publicKey, operation) {
-  // Fetch latest account state
+  // Fetch latest sequence number for the signer's account
   const account = await server.getAccount(publicKey);
 
   const tx = new TransactionBuilder(account, {
@@ -55,65 +58,74 @@ async function buildAndSubmit(publicKey, operation) {
     networkPassphrase: NETWORK_PASSPHRASE,
   })
     .addOperation(operation)
-    .setTimeout(30)
+    .setTimeout(60) // 60 seconds — enough for testnet latency
     .build();
 
-  // Simulate to get Soroban resource footprint
+  // Simulate to get Soroban resource footprint + fee
   const simResult = await server.simulateTransaction(tx);
 
   if (rpc.Api.isSimulationError(simResult)) {
     throw new Error(`Simulation failed: ${simResult.error}`);
   }
 
-  // Assemble adds footprint + fee bump data Soroban needs
+  // assembleTransaction injects footprint + resource fee
   const preparedTx = rpc.assembleTransaction(tx, simResult).build();
 
-  // Convert to base64 XDR string for Freighter
-  const xdrBase64 = toXdrBase64(preparedTx);
+  // Sign via Freighter (v3)
+  const signedXdr = await signTx(toXdrBase64(preparedTx));
 
-  // Ask Freighter to sign
-  const signResult = await signTransaction(xdrBase64, {
-    networkPassphrase: NETWORK_PASSPHRASE,
-  });
-
-  // freighter-api v3 returns { signedTxXdr, signerAddress } or a string
-  const signedXdr =
-    typeof signResult === "string" ? signResult : signResult?.signedTxXdr;
-
-  if (!signedXdr) {
-    throw new Error("Freighter did not return a signed transaction.");
-  }
-
-  // Reconstruct the signed transaction from XDR
+  // Reconstruct signed transaction from XDR
   const signedTx = TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE);
 
   // Submit to the network
   const sendResult = await server.sendTransaction(signedTx);
 
+  // "ERROR" status means the transaction was rejected before ledger close.
+  // errorResult is an XDR object — convert safely via toXDR().toString('base64')
   if (sendResult.status === "ERROR") {
-    throw new Error(
-      `Submit failed: ${JSON.stringify(sendResult.errorResult)}`
-    );
+    let reason = "unknown error";
+    try {
+      // Try to get a readable string without triggering XDR union parsing
+      reason = sendResult.errorResult?.toXDR("base64") ?? reason;
+    } catch {
+      reason = String(sendResult.errorResult ?? reason);
+    }
+    throw new Error(`Transaction rejected by network: ${reason}`);
   }
 
-  // Poll until confirmed
-  let getResult = await server.getTransaction(sendResult.hash);
-  let attempts = 0;
-  while (getResult.status === rpc.Api.GetTransactionStatus.NOT_FOUND) {
-    if (attempts++ > 20) throw new Error("Transaction timed out after 30s");
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    getResult = await server.getTransaction(sendResult.hash);
+  // "DUPLICATE" means this exact tx was already submitted — treat as success
+  // and poll for the result using the hash
+  const hash = sendResult.hash;
+  if (!hash) throw new Error("No transaction hash returned from network.");
+
+  // Poll until ledger confirms (or timeout after ~45s)
+  let getResult;
+  for (let i = 0; i < 30; i++) {
+    getResult = await server.getTransaction(hash);
+    if (getResult.status !== rpc.Api.GetTransactionStatus.NOT_FOUND) break;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+
+  if (!getResult || getResult.status === rpc.Api.GetTransactionStatus.NOT_FOUND) {
+    throw new Error("Transaction timed out — not confirmed after 45s. Try again.");
   }
 
   if (getResult.status === rpc.Api.GetTransactionStatus.FAILED) {
-    throw new Error("Transaction failed on-chain");
+    // resultXdr gives a readable failure reason
+    let reason = "on-chain execution failed";
+    try {
+      reason = getResult.resultXdr?.toXDR("base64") ?? reason;
+    } catch {
+      reason = String(getResult.resultXdr ?? reason);
+    }
+    throw new Error(`Transaction failed on-chain: ${reason}`);
   }
 
   return getResult;
 }
 
 // ─────────────────────────────────────────────
-// addProduct
+// addProduct  –  write (requires wallet signature)
 // ─────────────────────────────────────────────
 export async function addProduct(publicKey, name, brand) {
   const operation = Operation.invokeContractFunction({
@@ -135,15 +147,10 @@ export async function addProduct(publicKey, name, brand) {
 }
 
 // ─────────────────────────────────────────────
-// getProduct  –  read-only simulation
+// getProduct  –  read-only simulation, no wallet needed
 // ─────────────────────────────────────────────
 export async function getProduct(id) {
-  const dummyAccount = new Account(
-    "GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN",
-    "0"
-  );
-
-  const tx = new TransactionBuilder(dummyAccount, {
+  const tx = new TransactionBuilder(dummyAccount(), {
     fee: BASE_FEE,
     networkPassphrase: NETWORK_PASSPHRASE,
   })
@@ -160,7 +167,7 @@ export async function getProduct(id) {
   const simResult = await server.simulateTransaction(tx);
 
   if (rpc.Api.isSimulationError(simResult)) {
-    return null; // not found → show Fake
+    return null; // product not found → show Fake
   }
 
   const raw = scValToNative(simResult.result.retval);
@@ -174,15 +181,10 @@ export async function getProduct(id) {
 }
 
 // ─────────────────────────────────────────────
-// verifyProduct  –  read-only simulation
+// verifyProduct  –  read-only simulation, no wallet needed
 // ─────────────────────────────────────────────
 export async function verifyProduct(id) {
-  const dummyAccount = new Account(
-    "GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN",
-    "0"
-  );
-
-  const tx = new TransactionBuilder(dummyAccount, {
+  const tx = new TransactionBuilder(dummyAccount(), {
     fee: BASE_FEE,
     networkPassphrase: NETWORK_PASSPHRASE,
   })

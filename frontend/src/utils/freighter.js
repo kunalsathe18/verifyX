@@ -1,22 +1,28 @@
 // ============================================================
 // freighter.js  –  @stellar/freighter-api v3
-// v3 API changes:
-//   getPublicKey()  →  removed
-//   getAddress()    →  returns { address, error }
-//   requestAccess() →  returns { address, error }
+//
+// v3 API:
+//   isConnected()   → { isConnected: bool, error? }
+//   getAddress()    → { address: string, error? }
+//   requestAccess() → { address: string, error? }
+//   getNetwork()    → { network: string, networkPassphrase: string, error? }
+//   signTransaction(xdr, opts) → { signedTxXdr: string, signerAddress: string, error? }
 // ============================================================
 
 import {
   isConnected,
   getAddress,
   requestAccess,
+  getNetwork,
+  signTransaction,
 } from "@stellar/freighter-api";
 
-// Returns true if Freighter extension is installed
+export const TESTNET_PASSPHRASE = "Test SDF Network ; September 2015";
+
+// ── Is Freighter installed? ──────────────────────────────────
 export async function isFreighterInstalled() {
   try {
     const result = await isConnected();
-    // v3 returns { isConnected: bool, error? }
     if (typeof result === "object" && "isConnected" in result) {
       return result.isConnected;
     }
@@ -26,7 +32,7 @@ export async function isFreighterInstalled() {
   }
 }
 
-// Prompts the user to connect. Returns the public key string.
+// ── Connect wallet — prompts user if not already connected ───
 export async function connectWallet() {
   const installed = await isFreighterInstalled();
   if (!installed) {
@@ -35,23 +41,25 @@ export async function connectWallet() {
     );
   }
 
-  // requestAccess opens the Freighter popup and returns { address, error }
   const accessResult = await requestAccess();
   if (accessResult?.error) {
     throw new Error(`Wallet access denied: ${accessResult.error}`);
   }
 
-  // address is the public key in v3
   const address =
     typeof accessResult === "string"
       ? accessResult
       : accessResult?.address;
 
   if (!address) throw new Error("No address returned from Freighter.");
+
+  // Validate the user is on Testnet
+  await assertTestnet();
+
   return address;
 }
 
-// Returns the currently connected address without prompting, or null.
+// ── Get already-connected address without prompting ─────────
 export async function getConnectedAddress() {
   try {
     const result = await getAddress();
@@ -62,7 +70,48 @@ export async function getConnectedAddress() {
   }
 }
 
-// Shortens a Stellar address for display: "GABC...XYZ"
+// ── Check network — throws if not on Testnet ─────────────────
+export async function assertTestnet() {
+  try {
+    const result = await getNetwork();
+    const passphrase =
+      typeof result === "string" ? result : result?.networkPassphrase;
+
+    if (passphrase && passphrase !== TESTNET_PASSPHRASE) {
+      throw new Error(
+        "Freighter is connected to the wrong network. Please switch to Testnet inside the Freighter extension."
+      );
+    }
+  } catch (err) {
+    // Re-throw only our own error
+    if (err.message?.includes("wrong network")) throw err;
+    // If getNetwork fails for other reasons, let it pass silently
+  }
+}
+
+// ── Sign a transaction XDR string ───────────────────────────
+export async function signTx(xdrBase64) {
+  await assertTestnet();
+
+  const result = await signTransaction(xdrBase64, {
+    networkPassphrase: TESTNET_PASSPHRASE,
+  });
+
+  if (result?.error) {
+    throw new Error(`Signing failed: ${result.error}`);
+  }
+
+  const signedXdr =
+    typeof result === "string" ? result : result?.signedTxXdr;
+
+  if (!signedXdr) {
+    throw new Error("Freighter did not return a signed transaction.");
+  }
+
+  return signedXdr;
+}
+
+// ── Shorten address for display: "GABC...XYZ" ───────────────
 export function shortenAddress(address) {
   if (!address) return "";
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
