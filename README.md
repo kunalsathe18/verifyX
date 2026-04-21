@@ -1,18 +1,32 @@
 # verifyX
 
-A blockchain-based product authenticity verification system built on the Stellar network. Sellers register products on-chain and buyers verify genuineness using a unique Product ID — no middlemen, no central database.
+Blockchain-based product authenticity verification on the Stellar network. Sellers register products on-chain, buyers verify genuineness using a unique Product ID.
+
+**Live:** [origincheck.netlify.app](https://origincheck.netlify.app)
 
 ---
 
-## Tech Stack
+## Stack
 
-| Layer | Technology |
+| Layer | Tech |
 |---|---|
 | Smart Contract | Rust · Soroban SDK 21.x |
 | Blockchain | Stellar Testnet |
 | Frontend | React · Vite |
-| Styling | Plain CSS |
-| Wallet | Freighter Browser Extension |
+| Wallet | Freighter Extension |
+| Hosting | Netlify |
+
+---
+
+## Deployed Contract
+
+| | |
+|---|---|
+| **Network** | Stellar Testnet |
+| **Contract ID** | `CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW` |
+| **Explorer** | [View on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW) |
+
+> Previously deployed contract (revoked): `CBZFP5LCW7SCY5XOD5KMITXEMAJSUC3KNN3THM7OUEP2D6JIJSFRGLXI`
 
 ---
 
@@ -21,82 +35,52 @@ A blockchain-based product authenticity verification system built on the Stellar
 ```
 verifyX/
 ├── contract/
+│   ├── src/lib.rs          # Soroban smart contract
 │   ├── Cargo.toml
-│   └── src/
-│       └── lib.rs
-└── frontend/
-    ├── index.html
-    ├── vite.config.js
-    ├── package.json
-    ├── .env.example
-    └── src/
-        ├── App.jsx
-        ├── components/
-        │   ├── WalletConnect.jsx
-        │   ├── AddProduct.jsx
-        │   └── VerifyProduct.jsx
-        ├── styles/
-        │   └── App.css
-        └── utils/
-            ├── contract.js
-            └── freighter.js
+│   └── Cargo.lock
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # WalletConnect, AddProduct, VerifyProduct, NetworkBanner
+│   │   ├── utils/          # contract.js, freighter.js
+│   │   ├── styles/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── index.html
+│   └── vite.config.js
+├── netlify.toml
+└── README.md
 ```
 
 ---
 
-## Deployed Contract
+## Local Development
 
-| | Value |
-|---|---|
-| **Network** | Stellar Testnet |
-| **Contract ID** | `CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW` |
-| **Explorer** | [View on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW) |
+**Prerequisites:** Rust, Stellar CLI v25+, Node.js v18+, Freighter browser extension
 
-> This is the **second deployment** — the contract was intentionally redeployed after the initial deployment to demonstrate the full deploy lifecycle.
->
-> Previous contract ID (revoked): `CBZFP5LCW7SCY5XOD5KMITXEMAJSUC3KNN3THM7OUEP2D6JIJSFRGLXI`
-
----
-
-## Prerequisites
-
-- [Rust](https://rustup.rs) (stable)
-- [Stellar CLI](https://developers.stellar.org/docs/tools/stellar-cli) v25+
-- [Node.js](https://nodejs.org) v18+
-- [Freighter Wallet](https://freighter.app) browser extension
-
-Install Stellar CLI:
 ```bash
-cargo install --locked stellar-cli --features opt
-```
+# 1. Clone and install frontend deps
+git clone https://github.com/kunalsathe18/verifyX
+cd verifyX/frontend
+npm install
 
-Add the WebAssembly build target:
-```bash
-rustup target add wasm32v1-none
+# 2. Set up environment
+cp .env.example .env
+# Edit .env with your contract ID
+
+# 3. Run dev server
+npm run dev
 ```
 
 ---
 
-## Smart Contract
-
-### Build
+## Contract Deployment
 
 ```bash
+# Build
 cd contract
 stellar contract build
-```
 
-Output: `contract/target/wasm32v1-none/release/verifyx.wasm`
-
-### Test
-
-```bash
-cargo test
-```
-
-### Deploy to Testnet
-
-```bash
 # Create and fund a testnet identity
 stellar keys generate alice --network testnet
 stellar keys fund alice --network testnet
@@ -105,90 +89,54 @@ stellar keys fund alice --network testnet
 stellar contract deploy \
   --wasm target/wasm32v1-none/release/verifyx.wasm \
   --source alice \
-  --network testnet
-```
-
-Copy the Contract ID from the output — you will need it for the frontend.
-
-### Contract Functions
-
-| Function | Parameters | Returns | Description |
-|---|---|---|---|
-| `add_product` | `manufacturer: Address, name: String, brand: String` | `u64` | Register a product, returns its ID |
-| `get_product` | `id: u64` | `Product` | Returns product details or panics if not found |
-| `verify_product` | `id: u64` | `bool` | Returns true if the product exists |
-| `get_product_count` | — | `u64` | Total number of registered products |
-
----
-
-## Frontend
-
-### Setup
-
-```bash
-cd frontend
-cp .env.example .env
-```
-
-Edit `.env`:
-```env
-VITE_CONTRACT_ID=YOUR_CONTRACT_ID_HERE
-VITE_RPC_URL=https://soroban-testnet.stellar.org
-```
-
-### Install and Run
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
-### Production Build
-
-```bash
-npm run build
-# Output: frontend/dist/
+  --rpc-url https://soroban-testnet.stellar.org \
+  --network-passphrase "Test SDF Network ; September 2015"
 ```
 
 ---
 
-## Freighter Wallet Setup
+## CI/CD Pipeline
 
-1. Install Freighter from [freighter.app](https://freighter.app)
-2. Create or import a wallet
-3. Switch network to **Testnet** inside the extension
-4. Fund your testnet address at [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)
+This project uses **Netlify's built-in CI/CD**:
+
+- Every push to the `main` branch triggers an automatic production deployment
+- Netlify runs `npm run build` inside `frontend/` using the config in `netlify.toml`
+- Environment variables (`VITE_CONTRACT_ID`, `VITE_RPC_URL`) are managed in Netlify's dashboard — never committed to the repo
+- Build status is visible under the **Deploys** tab on Netlify
+
+```
+git push origin main
+       │
+       ▼
+  Netlify detects push
+       │
+       ▼
+  npm run build (Vite)
+       │
+       ▼
+  Deploy to origincheck.netlify.app
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `VITE_CONTRACT_ID` | Deployed Soroban contract ID |
+| `VITE_RPC_URL` | Stellar RPC endpoint (default: testnet) |
+
+Copy `frontend/.env.example` to `frontend/.env` for local development.
 
 ---
 
 ## How It Works
 
-```
-Seller                        Blockchain                      Buyer
-  |                               |                             |
-  |-- Connect wallet ------------>|                             |
-  |-- Register product (name,     |                             |
-  |   brand) ------------------->|                             |
-  |<-- Product ID returned -------|                             |
-  |                               |                             |
-  |   (Product ID shared          |<-- Enter Product ID --------|
-  |    with buyer)                |--- Lookup on-chain -------->|
-  |                               |<-- Genuine / Not Found -----|
-```
-
----
-
-## Troubleshooting
-
-| Issue | Solution |
-|---|---|
-| `wasm32v1-none` target missing | Run `rustup target add wasm32v1-none` |
-| Freighter not detected | Install the extension and refresh the page |
-| Transaction fails | Ensure your Freighter account is funded on Testnet |
-| Contract ID not found | Verify `VITE_CONTRACT_ID` in `frontend/.env` |
-| Freighter on wrong network | Switch to Testnet inside the Freighter extension |
+1. Seller connects Freighter wallet (Testnet)
+2. Seller registers a product — transaction signed on-chain
+3. A unique Product ID is returned
+4. Buyer enters the Product ID to verify authenticity
+5. Contract confirms **Genuine ✅** or **Not Found ❌**
 
 ---
 
