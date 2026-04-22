@@ -31,8 +31,38 @@ export default function AddProduct({ walletAddress }) {
     setStatus(null);
 
     try {
-      const productId = await addProduct(walletAddress, name.trim(), brand.trim());
-      setStatus({ type: "success", message: "Product registered successfully!", productId });
+      const result = await addProduct(walletAddress, name.trim(), brand.trim());
+      
+      // result can be { productId, txHash } or just a number (productId)
+      const productId = typeof result === 'object' ? result.productId : result;
+      const txHash = typeof result === 'object' ? result.txHash : null;
+      
+      if (productId === "SUCCESS") {
+        // Transaction succeeded but we couldn't get the ID due to RPC issues
+        setStatus({ 
+          type: "success", 
+          message: "Product registered successfully on-chain! Check the console for the transaction hash.", 
+          productId: null 
+        });
+      } else {
+        setStatus({ type: "success", message: "Product registered successfully!", productId });
+        
+        // Emit event for transaction history if we have both productId and txHash
+        if (productId && txHash) {
+          window.dispatchEvent(
+            new CustomEvent("productRegistered", {
+              detail: {
+                productId,
+                txHash,
+                name: name.trim(),
+                brand: brand.trim(),
+                timestamp: Date.now(),
+              },
+            })
+          );
+        }
+      }
+      
       setName("");
       setBrand("");
     } catch (err) {
@@ -112,20 +142,29 @@ export default function AddProduct({ walletAddress }) {
       {status?.type === "success" && (
         <div className="status-box success">
           <p>✅ {status.message}</p>
-          <div className="product-id-row">
-            <span className="product-id-label">Your Product ID:</span>
-            <span className="product-id-value">#{status.productId}</span>
-            <button
-              className="copy-btn"
-              onClick={() => handleCopy(status.productId)}
-              title="Copy Product ID"
-            >
-              {copied ? "✓ Copied" : "Copy"}
-            </button>
-          </div>
-          <p className="product-id-hint">
-            Share this ID with buyers so they can verify authenticity.
-          </p>
+          {status.productId && (
+            <>
+              <div className="product-id-row">
+                <span className="product-id-label">Your Product ID:</span>
+                <span className="product-id-value">#{status.productId}</span>
+                <button
+                  className="copy-btn"
+                  onClick={() => handleCopy(status.productId)}
+                  title="Copy Product ID"
+                >
+                  {copied ? "✓ Copied" : "Copy"}
+                </button>
+              </div>
+              <p className="product-id-hint">
+                Share this ID with buyers so they can verify authenticity.
+              </p>
+            </>
+          )}
+          {!status.productId && (
+            <p className="product-id-hint">
+              Your product was registered! Check the browser console for the transaction hash to verify on Stellar Explorer.
+            </p>
+          )}
         </div>
       )}
     </div>

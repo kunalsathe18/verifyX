@@ -3,6 +3,7 @@ import WalletConnect from "./components/WalletConnect";
 import AddProduct from "./components/AddProduct";
 import VerifyProduct from "./components/VerifyProduct";
 import NetworkBanner from "./components/NetworkBanner";
+import TransactionHistory from "./components/TransactionHistory";
 
 export default function App() {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -39,6 +40,11 @@ export default function App() {
         <div className="cards-grid">
           <AddProduct walletAddress={walletAddress} />
           <VerifyProduct />
+        </div>
+
+        {/* Transaction History */}
+        <div className="transaction-history-section">
+          <TransactionHistory />
         </div>
 
         <section className="how-it-works">

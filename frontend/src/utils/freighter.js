@@ -93,7 +93,10 @@ export async function assertTestnet() {
 export async function signTx(xdrBase64) {
   await assertTestnet();
 
+  // freighter-api v3 signTransaction signature:
+  // signTransaction(xdr, { network?, networkPassphrase? })
   const result = await signTransaction(xdrBase64, {
+    network: TESTNET_PASSPHRASE,
     networkPassphrase: TESTNET_PASSPHRASE,
   });
 

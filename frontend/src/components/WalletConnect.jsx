@@ -25,6 +25,7 @@ export default function WalletConnect({ onConnect }) {
         onConnect(existing);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Called when the user clicks "Connect Wallet"
@@ -42,16 +43,32 @@ export default function WalletConnect({ onConnect }) {
     }
   }
 
+  // Called when the user clicks "Disconnect"
+  function handleDisconnect() {
+    setAddress(null);
+    onConnect(null); // lift state up to App
+    setError("");
+  }
+
   return (
     <div className="wallet-bar">
       {address ? (
-        // Show the connected address
-        <div className="wallet-connected">
-          <span className="wallet-dot" />
-          <span className="wallet-label">Connected:</span>
-          <span className="wallet-address" title={address}>
-            {shortenAddress(address)}
-          </span>
+        // Show the connected address with disconnect button
+        <div className="wallet-connected-wrapper">
+          <div className="wallet-connected">
+            <span className="wallet-dot" />
+            <span className="wallet-label">Connected:</span>
+            <span className="wallet-address" title={address}>
+              {shortenAddress(address)}
+            </span>
+          </div>
+          <button
+            className="btn-disconnect"
+            onClick={handleDisconnect}
+            title="Disconnect wallet"
+          >
+            ✕
+          </button>
         </div>
       ) : (
         // Show the connect button
