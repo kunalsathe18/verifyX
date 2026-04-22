@@ -33,7 +33,7 @@ export async function isFreighterInstalled() {
 }
 
 // ── Connect wallet — prompts user if not already connected ───
-export async function connectWallet() {
+export async function connectWallet(forcePrompt = false) {
   const installed = await isFreighterInstalled();
   if (!installed) {
     throw new Error(
@@ -41,6 +41,8 @@ export async function connectWallet() {
     );
   }
 
+  // Always use requestAccess to ensure popup appears
+  // This is the only way to "reconnect" after disconnect
   const accessResult = await requestAccess();
   if (accessResult?.error) {
     throw new Error(`Wallet access denied: ${accessResult.error}`);
@@ -61,6 +63,12 @@ export async function connectWallet() {
 
 // ── Get already-connected address without prompting ─────────
 export async function getConnectedAddress() {
+  // Check if user manually disconnected
+  const isDisconnected = localStorage.getItem("wallet_manually_disconnected");
+  if (isDisconnected === "true") {
+    return null;
+  }
+
   try {
     const result = await getAddress();
     if (typeof result === "string") return result || null;

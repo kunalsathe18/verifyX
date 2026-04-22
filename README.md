@@ -2,7 +2,52 @@
 
 A blockchain-based product authenticity verification platform built on Stellar. Sellers register products on-chain, buyers verify authenticity using unique Product IDs — no middlemen, no fakes.
 
-**Live Demo:** [origincheck.netlify.app](https://origincheck.netlify.app)
+**Live Demo:** [https://origincheck.netlify.app](https://origincheck.netlify.app)
+
+---
+
+## Screenshots
+
+### Product Registration & Verification
+
+<div align="center">
+
+#### Main Dashboard
+![Main Dashboard](Screen%20Recordings/Screenshot%202026-04-23%20015532.png)
+*Product registration and verification interface*
+
+#### Product Registration Success
+![Product Registration Success](Screen%20Recordings/Screenshot%202026-04-23%20015553.png)
+*Register a product on the blockchain and receive a unique Product ID*
+
+#### Verify Product Authenticity
+![Product Verification](Screen%20Recordings/Screenshot%202026-04-23%20015718.png)
+*Verify product authenticity by entering the Product ID*
+
+#### Genuine Product Details
+![Genuine Product Details](Screen%20Recordings/Screenshot%202026-04-23%20015848.png)
+*View complete product details including manufacturer address*
+
+#### Transaction History Dashboard
+![Transaction History](Screen%20Recordings/Screenshot%202026-04-23%20015907.png)
+*Track all registered products with blockchain explorer links*
+
+#### Complete Workflow
+![Complete Workflow](Screen%20Recordings/Screenshot%202026-04-23%20015927.png)
+*Full product registration and verification workflow*
+
+</div>
+
+### 🎥 Demo Video
+
+Watch the complete product registration and verification process:
+
+<video width="100%" controls>
+  <source src="Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+> **Note:** For GitHub, the video may not display directly. [Download the demo video](Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4) or watch it after cloning the repository.
 
 ---
 
@@ -48,8 +93,8 @@ A blockchain-based product authenticity verification platform built on Stellar. 
 verifyX/
 ├── contract/
 │   ├── src/
-│   │   └── lib.rs              # Soroban smart contract
-│   ├── Cargo.toml              # Rust dependencies
+│   │   └── lib.rs                      # Soroban smart contract
+│   ├── Cargo.toml                      # Rust dependencies
 │   └── Cargo.lock
 │
 ├── frontend/
@@ -59,6 +104,7 @@ verifyX/
 │   │   │   ├── VerifyProduct.jsx       # Product verification form
 │   │   │   ├── TransactionHistory.jsx  # Transaction history display
 │   │   │   ├── WalletConnect.jsx       # Wallet connection handler
+│   │   │   ├── DisconnectModal.jsx     # Wallet disconnect modal
 │   │   │   └── NetworkBanner.jsx       # Network warning banner
 │   │   ├── utils/
 │   │   │   ├── contract.js             # Soroban contract interactions
@@ -70,9 +116,14 @@ verifyX/
 │   ├── public/
 │   │   └── favicon.svg
 │   ├── .env.example                    # Environment template
+│   ├── .env                            # Environment variables (not committed)
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
+│
+├── Screen Recordings/
+│   ├── Screenshot *.png                # App screenshots (6 images)
+│   └── Screen Recording *.mp4          # Demo video
 │
 ├── .gitignore
 ├── netlify.toml                        # Netlify deployment config
@@ -169,7 +220,7 @@ Run Tests & Checks
       ↓
 Deploy to Production
       ↓
-Live at origincheck.netlify.app ✅
+Live at https://origincheck.netlify.app ✅
 ```
 
 ### Configuration
