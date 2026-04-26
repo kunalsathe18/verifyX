@@ -24,17 +24,37 @@ export default function VerifyProduct() {
     setError("");
 
     try {
+      console.log("🔍 Verifying product ID:", id);
       const product = await getProduct(id);
+      
       if (product) {
+        console.log("✅ Product found:", product);
         setResult(product);
       } else {
+        console.log("❌ Product not found");
         setNotFound(true);
       }
     } catch (err) {
+      console.error("Verification error:", err);
+      
+      // Handle different types of errors gracefully
       if (err.message?.toLowerCase().includes("not found")) {
         setNotFound(true);
-      } else {
+      } else if (err.message?.includes("Bad union switch") || 
+                 err.message?.includes("union") ||
+                 err.message?.includes("parsing") ||
+                 err.message?.includes("XDR")) {
+        // Don't show technical RPC errors to users
+        setError("Network error occurred. Please try again in a moment.");
+      } else if (err.message?.includes("network") || 
+                 err.message?.includes("connection")) {
+        setError("Network connection error. Please check your connection and try again.");
+      } else if (err.message && !err.message.includes("switch") && !err.message.includes("union")) {
+        // Only show non-technical error messages
         setError(err.message);
+      } else {
+        // Fallback for any other technical errors
+        setError("Unable to verify product at this time. Please try again later.");
       }
     } finally {
       setLoading(false);

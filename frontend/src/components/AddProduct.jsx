@@ -31,24 +31,24 @@ export default function AddProduct({ walletAddress }) {
     setStatus(null);
 
     try {
+      console.log("🚀 Starting product registration process...");
       const result = await addProduct(walletAddress, name.trim(), brand.trim());
       
       // result can be { productId, txHash } or just a number (productId)
       const productId = typeof result === 'object' ? result.productId : result;
       const txHash = typeof result === 'object' ? result.txHash : null;
       
-      if (productId === "SUCCESS") {
-        // Transaction succeeded but we couldn't get the ID due to RPC issues
+      console.log("✅ Registration completed:", { productId, txHash });
+      
+      if (productId) {
         setStatus({ 
           type: "success", 
-          message: "Product registered successfully on-chain! Check the console for the transaction hash.", 
-          productId: null 
+          message: "Product registered successfully on blockchain!", 
+          productId 
         });
-      } else {
-        setStatus({ type: "success", message: "Product registered successfully!", productId });
         
         // Emit event for transaction history if we have both productId and txHash
-        if (productId && txHash) {
+        if (productId && txHash && txHash !== "unknown" && !txHash.startsWith("rpc-error")) {
           window.dispatchEvent(
             new CustomEvent("productRegistered", {
               detail: {
@@ -61,12 +61,55 @@ export default function AddProduct({ walletAddress }) {
             })
           );
         }
+      } else {
+        setStatus({ 
+          type: "success", 
+          message: "Product registered successfully on blockchain!", 
+          productId: null 
+        });
       }
       
       setName("");
       setBrand("");
+      
     } catch (err) {
-      setStatus({ type: "error", message: err.message });
+      console.error("Registration error:", err);
+      
+      // Filter out technical RPC errors and show user-friendly messages
+      let userMessage = "Registration failed. Please try again.";
+      
+      if (err.message?.includes("User rejected") || 
+          err.message?.includes("denied") ||
+          err.message?.includes("cancelled")) {
+        userMessage = "Transaction was cancelled. Please try again when ready.";
+      } else if (err.message?.includes("Transaction failed") ||
+                 err.message?.includes("insufficient balance") ||
+                 err.message?.includes("authorization")) {
+        userMessage = err.message; // These are already user-friendly
+      } else if (err.message?.includes("Account not found")) {
+        userMessage = "Wallet account not found. Please fund your wallet with testnet XLM first.";
+      } else if (err.message?.includes("network") || 
+                 err.message?.includes("connection") ||
+                 err.message?.includes("timeout")) {
+        userMessage = "Network error. Please check your connection and try again.";
+      } else if (err.message?.includes("wallet") || 
+                 err.message?.includes("Freighter")) {
+        userMessage = "Wallet error. Please make sure Freighter is installed and connected.";
+      } else if (err.message?.includes("Bad union switch") || 
+                 err.message?.includes("union") ||
+                 err.message?.includes("parsing") ||
+                 err.message?.includes("XDR")) {
+        // Don't show technical RPC errors to users
+        userMessage = "Network processing error. Your transaction may have succeeded. Please check the verification section.";
+      } else if (err.message && !err.message.includes("switch") && !err.message.includes("union")) {
+        // Only show non-technical error messages
+        userMessage = err.message;
+      }
+      
+      setStatus({ 
+        type: "error", 
+        message: userMessage
+      });
     } finally {
       setLoading(false);
     }

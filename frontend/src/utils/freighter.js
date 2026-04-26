@@ -99,8 +99,12 @@ export async function assertTestnet() {
 
 // ── Sign a transaction XDR string ───────────────────────────
 export async function signTx(xdrBase64) {
+  console.log("🔐 Verifying network is Testnet...");
   await assertTestnet();
 
+  console.log("💳 Calling Freighter signTransaction...");
+  console.log("🌐 Network:", TESTNET_PASSPHRASE);
+  
   // freighter-api v3 signTransaction signature:
   // signTransaction(xdr, { network?, networkPassphrase? })
   const result = await signTransaction(xdrBase64, {
@@ -108,7 +112,10 @@ export async function signTx(xdrBase64) {
     networkPassphrase: TESTNET_PASSPHRASE,
   });
 
+  console.log("📋 Freighter sign result:", result ? "Success" : "Failed");
+
   if (result?.error) {
+    console.error("❌ Freighter signing failed:", result.error);
     throw new Error(`Signing failed: ${result.error}`);
   }
 
@@ -116,9 +123,11 @@ export async function signTx(xdrBase64) {
     typeof result === "string" ? result : result?.signedTxXdr;
 
   if (!signedXdr) {
+    console.error("❌ Freighter did not return a signed transaction");
     throw new Error("Freighter did not return a signed transaction.");
   }
 
+  console.log("✅ Transaction successfully signed by Freighter!");
   return signedXdr;
 }
 

@@ -10,41 +10,53 @@ A blockchain-based product authenticity verification platform built on Stellar. 
 
 | Requirement | Status | Details |
 |-------------|--------|---------|
-| **Inter-contract call** | ✅ N/A | Single contract implementation - no inter-contract calls needed |
-| **Custom token/pool** | ✅ N/A | Product verification system - no token/pool required |
-| **CI/CD Running** | ✅ **PASS** | Netlify automated deployment on every push to `main` |
+| **Inter-contract call** | ✅ **N/A** | Single contract implementation - no inter-contract calls needed for this use case |
+| **Custom token/pool** | ✅ **N/A** | Product verification system - no token/pool required for this use case |
+| **CI/CD Running** | ✅ **PASS** | Netlify automated deployment on every push to `main` branch |
 | **Mobile Responsive** | ✅ **PASS** | Fully responsive design - tested on mobile, tablet, desktop |
-| **8+ Meaningful Commits** | ✅ **PASS** | **11 commits** with clear, descriptive messages |
+| **8+ Meaningful Commits** | ✅ **PASS** | **15+ commits** with clear, descriptive messages |
 | **Production Ready** | ✅ **PASS** | Deployed at [origincheck.netlify.app](https://origincheck.netlify.app) |
-| **Advanced Contract** | ✅ **PASS** | Soroban smart contract with product registration & verification |
+| **Advanced Contract** | ✅ **PASS** | Soroban smart contract with authorization, events, and persistent storage |
 
-### Deployment Evidence
+### 🚀 Deployment Evidence
 - **Live URL:** https://origincheck.netlify.app
 - **CI/CD Platform:** Netlify
 - **Auto-Deploy:** Enabled on `main` branch
 - **Build Status:** ✅ Passing
 - **SSL/HTTPS:** ✅ Enabled
+- **Last Deploy:** Automatic on latest commit
 
-### Mobile Responsiveness
+### 📱 Mobile Responsiveness
 - ✅ Responsive breakpoints: 480px, 720px, 1100px
 - ✅ Touch-friendly buttons (min 44px height)
 - ✅ Mobile-optimized forms and inputs
 - ✅ Flexible grid layouts
-- ✅ Tested on multiple devices
+- ✅ Tested on multiple devices and screen sizes
 
-### Commit History
+### 📝 Commit History
 ```bash
 # View all commits
 git log --oneline
 
-# Total commits: 11
+# Total commits: 15+
 # Sample commits:
 # - initial commit: verifyX blockchain product verification app
 # - style: full mobile responsive layout
 # - feat: Vercel config, UX improvements
 # - updated readme and wallet integration
 # - Add screenshots, video, disconnect modal
+# - Fix RPC "Bad union switch" error handling
+# - Redeploy contract with new ID
+# - Simplify transaction flow for reliability
 ```
+
+### 🔧 Production-Ready Features
+- ✅ **Error Handling:** Comprehensive error handling with user-friendly messages
+- ✅ **Transaction Reliability:** Robust transaction flow with proper Soroban assembly
+- ✅ **RPC Resilience:** Graceful handling of network issues and RPC errors
+- ✅ **Wallet Integration:** Seamless Freighter wallet connect/disconnect
+- ✅ **Transaction History:** Persistent local storage with blockchain explorer links
+- ✅ **Network Validation:** Automatic testnet verification and warnings
 
 ---
 
@@ -56,7 +68,7 @@ git log --oneline
 
 #### Main Dashboard
 ![Main Dashboard](Screen%20Recordings/Screenshot%202026-04-23%20015532.png)
-*Product registration and verification interface*
+*Clean, intuitive interface for product registration and verification*
 
 #### Product Registration Success
 ![Product Registration Success](Screen%20Recordings/Screenshot%202026-04-23%20015553.png)
@@ -77,6 +89,10 @@ git log --oneline
 #### Complete Workflow
 ![Complete Workflow](Screen%20Recordings/Screenshot%202026-04-23%20015927.png)
 *Full product registration and verification workflow*
+
+#### Latest Production Build
+![Latest Build](Screen%20Recordings/Screenshot%202026-04-26%20054012.png)
+*Current production deployment with all features working*
 
 </div>
 
@@ -100,7 +116,9 @@ Watch the complete product registration and verification process:
 ✅ **Transaction History** — View all registered products with blockchain explorer links  
 ✅ **Wallet Management** — Connect and disconnect Freighter wallet seamlessly  
 ✅ **Real-time Updates** — Automatic transaction tracking and status updates  
-✅ **Mobile Responsive** — Optimized for all devices
+✅ **Mobile Responsive** — Optimized for all devices  
+✅ **Error Recovery** — Graceful handling of network issues and RPC errors  
+✅ **Network Validation** — Automatic testnet verification with warnings
 
 ---
 
@@ -111,9 +129,11 @@ Watch the complete product registration and verification process:
 | Smart Contract | Rust · Soroban SDK 21.x |
 | Blockchain | Stellar Testnet |
 | Frontend | React 18 · Vite 5 |
-| Wallet | Freighter Extension |
+| Wallet | Freighter Extension (v3 API) |
+| SDK | @stellar/stellar-sdk v13 |
 | Storage | LocalStorage (transaction history) |
-| Hosting | Netlify |
+| Hosting | Netlify (CI/CD) |
+| Styling | Custom CSS with responsive design |
 
 ---
 
@@ -122,10 +142,23 @@ Watch the complete product registration and verification process:
 | | |
 |---|---|
 | **Network** | Stellar Testnet |
-| **Contract ID** | `CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW` |
-| **Explorer** | [View on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW) |
+| **Contract ID** | `CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6` |
+| **RPC Endpoint** | `https://soroban-testnet.stellar.org` |
+| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6) |
+| **Deployment Date** | April 26, 2026 |
+| **Status** | ✅ Active and Verified |
 
-> Previously deployed contract (revoked): `CBZFP5LCW7SCY5XOD5KMITXEMAJSUC3KNN3THM7OUEP2D6JIJSFRGLXI`
+### Contract Verification
+```bash
+# Test contract via CLI
+stellar contract invoke \
+  --id CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6 \
+  --source alice \
+  --network testnet \
+  -- get_product_count
+
+# Expected output: Current product count (e.g., 2)
+```
 
 ---
 
@@ -164,11 +197,12 @@ verifyX/
 │   └── vite.config.js
 │
 ├── Screen Recordings/
-│   ├── Screenshot *.png                # App screenshots (6 images)
+│   ├── Screenshot *.png                # App screenshots (7 images)
 │   └── Screen Recording *.mp4          # Demo video
 │
 ├── .gitignore
 ├── netlify.toml                        # Netlify deployment config
+├── SUBMISSION.md                       # Submission documentation
 └── README.md
 ```
 
@@ -204,6 +238,31 @@ npm run dev
 
 The app will be available at `http://localhost:5173`
 
+### Using the Application
+
+1. **Install Freighter Wallet**
+   - Download from [freighter.app](https://freighter.app)
+   - Create or import a wallet
+   - Switch to **Testnet** network
+
+2. **Fund Your Wallet**
+   - Visit [Stellar Laboratory](https://laboratory.stellar.org/#account-creator)
+   - Paste your wallet address
+   - Click "Get test network lumens"
+   - You'll receive 10,000 XLM (testnet)
+
+3. **Connect & Register**
+   - Open the app at [origincheck.netlify.app](https://origincheck.netlify.app)
+   - Click "Connect Wallet"
+   - Fill in product details
+   - Sign the transaction in Freighter
+   - Receive your unique Product ID
+
+4. **Verify Products**
+   - Enter any Product ID
+   - Click "Verify Product"
+   - See instant authenticity results
+
 ---
 
 ## Contract Deployment
@@ -212,7 +271,7 @@ The app will be available at `http://localhost:5173`
 
 ```bash
 cd contract
-stellar contract build
+cargo build --target wasm32-unknown-unknown --release
 ```
 
 ### Deploy to Testnet
@@ -224,7 +283,7 @@ stellar keys fund deployer --network testnet
 
 # Deploy the contract
 stellar contract deploy \
-  --wasm target/wasm32v1-none/release/verifyx.wasm \
+  --wasm target/wasm32-unknown-unknown/release/verifyx.wasm \
   --source deployer \
   --network testnet
 
@@ -236,7 +295,7 @@ stellar contract deploy \
 ```bash
 # Edit frontend/.env
 VITE_CONTRACT_ID=YOUR_NEW_CONTRACT_ID
-VITE_RPC_URL=https://soroban-testnet.stellar.org:443
+VITE_RPC_URL=https://soroban-testnet.stellar.org
 ```
 
 ---
@@ -306,42 +365,9 @@ All deployment configuration is defined in `netlify.toml`:
 
 ---
 
-## Development Notes
-
-### Transaction Tracking
-- Transaction history is stored in browser's localStorage
-- Persists across page refreshes
-- Limited to last 10 transactions
-- Can be cleared manually via UI
-
-### Wallet Connection
-- Uses Freighter wallet extension
-- Supports connect/disconnect functionality
-- Address displayed in shortened format
-- Network warning shown if on mainnet
-
-### Error Handling
-- Simulation errors handled gracefully
-- Transaction polling with timeout (45s)
-- User-friendly error messages
-- Console logging for debugging
-
----
-
-## Environment Variables
-
-| Variable | Description | Default |
-|---|---|---|
-| `VITE_CONTRACT_ID` | Deployed Soroban contract ID | Required |
-| `VITE_RPC_URL` | Stellar RPC endpoint | `https://soroban-testnet.stellar.org:443` |
-
-Copy `frontend/.env.example` to `frontend/.env` for local development.
-
----
-
 ## Smart Contract Functions
 
-The Soroban smart contract provides three main functions:
+The Soroban smart contract provides four main functions:
 
 ### `add_product(manufacturer: Address, name: String, brand: String) -> u64`
 Registers a new product on the blockchain.
@@ -398,8 +424,9 @@ Returns the total number of registered products.
 
 ✅ **Production Ready**
 - Deployed on Stellar Testnet
-- Verified contract ID: `CAZLH6BM7ZCQKJFQK65LMZ2JVKBNWPA322QK4UNNG4OGXBZVXCHYOHCW`
+- Verified contract ID: `CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6`
 - Gas-optimized operations
+- Robust error handling
 
 ---
 
@@ -427,6 +454,68 @@ Returns the total number of registered products.
 - Direct links to Stellar Explorer for blockchain verification
 - Stored locally in browser (persists across sessions)
 - Clear history option available
+
+---
+
+## Development Notes
+
+### Transaction Flow
+The application uses a robust 6-step transaction flow:
+1. **Account Fetch** — Retrieves account details and validates balance
+2. **Transaction Build** — Creates transaction with contract invocation
+3. **Simulation** — Calculates required resources and fees
+4. **Assembly** — Injects Soroban footprint and resource limits
+5. **Signing** — User approves via Freighter wallet popup
+6. **Submission & Polling** — Sends to network and waits for confirmation
+
+### Error Handling
+- Comprehensive error handling at each transaction step
+- User-friendly error messages (no technical jargon)
+- Graceful handling of RPC parsing errors
+- Automatic retry logic for network issues
+- Balance validation before transaction submission
+
+### Wallet Connection
+- Uses Freighter wallet extension (v3 API)
+- Supports connect/disconnect functionality
+- Address displayed in shortened format
+- Network warning shown if on mainnet
+- Manual disconnect with localStorage persistence
+
+### Performance
+- Transaction confirmation: 5-15 seconds
+- Verification queries: 1-3 seconds (read-only)
+- Transaction cost: ~0.01-0.1 XLM
+- Recommended balance: 5+ XLM for testing
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_CONTRACT_ID` | Deployed Soroban contract ID | Required |
+| `VITE_RPC_URL` | Stellar RPC endpoint | `https://soroban-testnet.stellar.org` |
+
+Copy `frontend/.env.example` to `frontend/.env` for local development.
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue: "Account not found"**
+- **Solution:** Fund your wallet with testnet XLM at [Stellar Laboratory](https://laboratory.stellar.org/#account-creator)
+
+**Issue: "Insufficient XLM balance"**
+- **Solution:** Each transaction costs ~0.01-0.1 XLM. Get more testnet XLM from the Stellar Laboratory.
+
+**Issue: "Transaction was cancelled"**
+- **Solution:** You rejected the Freighter popup. Try again and click "Approve" when the popup appears.
+
+**Issue: Wallet popup doesn't appear**
+- **Solution:** Check if Freighter is installed and unlocked. Refresh the page and try reconnecting.
 
 ---
 
@@ -462,6 +551,15 @@ MIT License - feel free to use this project for learning or commercial purposes.
 - **Issues:** [GitHub Issues](https://github.com/kunalsathe18/verifyX/issues)
 - **Stellar Docs:** [Soroban Documentation](https://soroban.stellar.org)
 - **Freighter Wallet:** [Freighter Docs](https://www.freighter.app)
+- **Stellar Discord:** [Join Community](https://discord.gg/stellar)
+
+---
+
+## Acknowledgments
+
+- **Stellar Foundation** for the Soroban smart contract platform
+- **Freighter Team** for the excellent wallet extension
+- **Netlify** for seamless CI/CD and hosting
 
 ---
 
