@@ -9,8 +9,11 @@ import {
   connectWallet,
   getConnectedAddress,
   shortenAddress,
+  isFreighterInstalled,
 } from "../utils/freighter";
 import DisconnectModal from "./DisconnectModal";
+
+const FREIGHTER_DOWNLOAD_URL = "https://www.freighter.app/";
 
 export default function WalletConnect({ onConnect }) {
   const [address, setAddress] = useState(null);
@@ -44,6 +47,15 @@ export default function WalletConnect({ onConnect }) {
     setError("");
     
     try {
+      // First check if Freighter is installed
+      const installed = await isFreighterInstalled();
+      
+      if (!installed) {
+        setError("Freighter wallet not found");
+        setLoading(false);
+        return;
+      }
+      
       // Clear the disconnected flag BEFORE calling connectWallet
       localStorage.removeItem("wallet_manually_disconnected");
       
@@ -52,12 +64,25 @@ export default function WalletConnect({ onConnect }) {
       setAddress(publicKey);
       onConnect(publicKey);
     } catch (err) {
-      setError(err.message);
+      console.error("Connection error:", err);
+      
+      // Check if it's a Freighter not installed error
+      if (err.message?.includes("not installed") || err.message?.includes("Freighter wallet is not installed")) {
+        setError("Freighter wallet not found");
+      } else {
+        setError(err.message);
+      }
+      
       // If connection fails, restore disconnected state
       localStorage.setItem("wallet_manually_disconnected", "true");
     } finally {
       setLoading(false);
     }
+  }
+
+  // Redirect to Freighter download page
+  function handleInstallFreighter() {
+    window.open(FREIGHTER_DOWNLOAD_URL, "_blank", "noopener,noreferrer");
   }
 
   // Called when the user clicks "Disconnect"
@@ -116,7 +141,24 @@ export default function WalletConnect({ onConnect }) {
             >
               {loading ? "Connecting…" : "🔗 Connect Freighter Wallet"}
             </button>
-            {error && <p className="error-text">{error}</p>}
+            {error && (
+              <div style={{ textAlign: 'right' }}>
+                <p className="error-text">{error}</p>
+                {error.includes("not found") && (
+                  <a
+                    className="install-freighter-link"
+                    onClick={handleInstallFreighter}
+                    role="button"
+                    tabIndex={0}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') handleInstallFreighter();
+                    }}
+                  >
+                    Install Freighter →
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
