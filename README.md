@@ -13,7 +13,7 @@ A blockchain-based product authenticity verification platform built on Stellar. 
 | **Inter-contract call** | ✅ N/A | Single-contract design — no inter-contract calls needed |
 | **Custom token / pool** | ✅ N/A | Product verification system — no token or pool required |
 | **CI/CD Running** | ✅ PASS | 2 GitHub Actions workflows + Netlify auto-deploy |
-| **Mobile Responsive** | ✅ PASS | Fully responsive — breakpoints at 480 px, 720 px, 1100 px |
+| **Mobile Responsive** | ✅ PASS | Fully responsive — breakpoints at 480 px, 720 px, 1100 px · [see mobile screenshots ↓](#-mobile-responsive-design) |
 | **8+ Meaningful Commits** | ✅ PASS | 15+ commits with clear, descriptive messages |
 | **Production Ready** | ✅ PASS | Live at [origincheck.netlify.app](https://origincheck.netlify.app) |
 | **Advanced Contract** | ✅ PASS | Soroban contract with `require_auth`, events, persistent storage |
@@ -21,6 +21,8 @@ A blockchain-based product authenticity verification platform built on Stellar. 
 ---
 
 ## Screenshots
+
+### Desktop — Product Registration & Verification
 
 <div align="center">
 
@@ -41,6 +43,25 @@ A blockchain-based product authenticity verification platform built on Stellar. 
 | ![Latest](Screen%20Recordings/Screenshot%202026-04-26%20054012.png) |
 
 </div>
+
+---
+
+### 📱 Mobile Responsive Design
+
+The app is fully optimised for mobile devices with touch-friendly buttons, responsive layouts, and proper text scaling across all screen sizes.
+
+<div align="center">
+
+| Mobile View 1 | Mobile View 2 | Mobile View 3 |
+|---|---|---|
+| ![Mobile 1](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM.jpeg) | ![Mobile 2](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(1).jpeg) | ![Mobile 3](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(2).jpeg) |
+
+</div>
+
+**Responsive breakpoints:**
+- `< 480px` — single column, compact buttons, hidden labels
+- `480px – 720px` — medium sizing, touch-friendly targets (44px min)
+- `> 720px` — full two-column grid layout
 
 ### 🎥 Demo Video
 
