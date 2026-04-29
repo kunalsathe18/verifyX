@@ -32,8 +32,8 @@ export default function AuthPage({ onAuth }) {
     await new Promise(r => setTimeout(r, 300));
 
     const result = mode === "signup"
-      ? signUp(name, email, password, role)
-      : signIn(email, password);
+      ? await signUp(name, email, password, role)
+      : await signIn(email, password);
 
     setLoading(false);
 
