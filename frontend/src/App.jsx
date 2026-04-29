@@ -1,19 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import WalletConnect from "./components/WalletConnect";
 import AddProduct from "./components/AddProduct";
 import VerifyProduct from "./components/VerifyProduct";
 import NetworkBanner from "./components/NetworkBanner";
 import TransactionHistory from "./components/TransactionHistory";
+import Dashboard from "./components/Dashboard";
+import AuthPage from "./components/AuthPage";
+import { getSession, signOut } from "./utils/auth";
 
 export default function App() {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [user,          setUser]          = useState(() => getSession());
 
+  // Keep session in sync if another tab signs out
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === "verifyX_session") {
+        setUser(getSession());
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  // ── Not logged in → show auth page ──────────────────────
+  if (!user) {
+    return <AuthPage onAuth={u => setUser(u)} />;
+  }
+
+  const isSeller   = user.role === "seller";
+  const isCustomer = user.role === "customer";
+
+  function handleSignOut() {
+    signOut();
+    setUser(null);
+    setWalletAddress(null);
+  }
+
+  // ── Logged in → show main app ────────────────────────────
   return (
     <div className="app">
-      {/* Network warning — shown if Freighter is on mainnet */}
       <NetworkBanner />
 
-      {/* Header */}
       <header className="header">
         <div className="header-inner">
           <div className="logo">
@@ -21,38 +49,61 @@ export default function App() {
             <span className="logo-text">verifyX</span>
           </div>
           <p className="logo-tagline">Product Authenticity on the Blockchain</p>
-          <WalletConnect onConnect={setWalletAddress} />
+
+          {/* Right side: user info + wallet */}
+          <div className="header-right">
+            <div className="user-pill">
+              <span className="user-role-badge">
+                {isSeller ? "🏭 Seller" : "🛒 Customer"}
+              </span>
+              <span className="user-name">{user.name}</span>
+              <button
+                className="btn-signout"
+                onClick={handleSignOut}
+                title="Sign out"
+              >
+                ✕
+              </button>
+            </div>
+            <WalletConnect onConnect={setWalletAddress} />
+          </div>
         </div>
       </header>
 
-      {/* Main */}
       <main className="main">
         <section className="hero">
           <h1 className="hero-title">
             Is your product <span className="highlight">genuine</span>?
           </h1>
           <p className="hero-subtitle">
-            Sellers register products on-chain. Buyers verify authenticity
-            instantly — no middlemen, no fakes.
+            {isSeller
+              ? "Register your products on-chain and share Product IDs with buyers."
+              : "Enter a Product ID to instantly verify authenticity on the blockchain."}
           </p>
         </section>
 
+        {/* Dashboard — visible to everyone */}
+        <Dashboard />
+
         <div className="cards-grid">
-          <AddProduct walletAddress={walletAddress} />
-          <VerifyProduct />
+          {/* Sellers see Register + Verify; Customers see only Verify */}
+          {isSeller && <AddProduct walletAddress={walletAddress} />}
+          <VerifyProduct walletAddress={walletAddress} />
         </div>
 
-        {/* Transaction History */}
-        <div className="transaction-history-section">
-          <TransactionHistory />
-        </div>
+        {/* Transaction history — sellers only */}
+        {isSeller && (
+          <div className="transaction-history-section">
+            <TransactionHistory />
+          </div>
+        )}
 
         <section className="how-it-works">
           <h2>How it works</h2>
           <div className="steps">
             <div className="step">
               <span className="step-number">1</span>
-              <p>Seller connects Freighter wallet</p>
+              <p>Seller signs up &amp; connects wallet</p>
             </div>
             <div className="step-arrow">→</div>
             <div className="step">
@@ -62,29 +113,24 @@ export default function App() {
             <div className="step-arrow">→</div>
             <div className="step">
               <span className="step-number">3</span>
-              <p>Buyer enters Product ID to verify</p>
+              <p>Community approves (2 needed)</p>
             </div>
             <div className="step-arrow">→</div>
             <div className="step">
               <span className="step-number">4</span>
-              <p>Blockchain confirms genuine ✅ or fake ❌</p>
+              <p>Buyer verifies genuine ✅ or fake ❌</p>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <p>
           Built on{" "}
-          <a href="https://stellar.org" target="_blank" rel="noreferrer">
-            Stellar
-          </a>{" "}
-          with{" "}
-          <a href="https://soroban.stellar.org" target="_blank" rel="noreferrer">
-            Soroban
-          </a>{" "}
-          · verifyX
+          <a href="https://stellar.org" target="_blank" rel="noreferrer">Stellar</a>
+          {" "}with{" "}
+          <a href="https://soroban.stellar.org" target="_blank" rel="noreferrer">Soroban</a>
+          {" "}· verifyX
         </p>
       </footer>
     </div>

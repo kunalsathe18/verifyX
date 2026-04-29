@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { addProduct } from "../utils/contract";
+import { invalidateCache } from "../utils/indexer";
 
 export default function AddProduct({ walletAddress }) {
   const [name, setName]       = useState("");
@@ -49,6 +50,8 @@ export default function AddProduct({ walletAddress }) {
         
         // Emit event for transaction history if we have both productId and txHash
         if (productId && txHash && txHash !== "unknown" && !txHash.startsWith("rpc-error")) {
+          // Invalidate indexer cache so Dashboard refreshes with new product
+          invalidateCache();
           window.dispatchEvent(
             new CustomEvent("productRegistered", {
               detail: {

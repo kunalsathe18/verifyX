@@ -1,93 +1,100 @@
 # verifyX
 
-A blockchain-based product authenticity verification platform built on Stellar. Sellers register products on-chain, buyers verify authenticity using unique Product IDs — no middlemen, no fakes.
+A blockchain-based product authenticity platform built on Stellar. Sellers register products on-chain, the community approves them via multi-signature, and buyers verify authenticity instantly — no middlemen, no fakes.
 
 **Live Demo:** [https://origincheck.netlify.app](https://origincheck.netlify.app)
 
 ---
 
-## ✅ Project Requirements Checklist
+## Requirements Checklist
 
-| Requirement | Status | Details |
+| Requirement | Status | Evidence |
 |---|---|---|
-| **Inter-contract call** | ✅ N/A | Single-contract design — no inter-contract calls needed |
-| **Custom token / pool** | ✅ N/A | Product verification system — no token or pool required |
-| **CI/CD Running** | ✅ PASS | 2 GitHub Actions workflows + Netlify auto-deploy |
-| **Mobile Responsive** | ✅ PASS | Fully responsive — breakpoints at 480 px, 720 px, 1100 px · [see mobile screenshots ↓](#-mobile-responsive-design) |
-| **8+ Meaningful Commits** | ✅ PASS | 15+ commits with clear, descriptive messages |
-| **Production Ready** | ✅ PASS | Live at [origincheck.netlify.app](https://origincheck.netlify.app) |
-| **Advanced Contract** | ✅ PASS | Soroban contract with `require_auth`, events, persistent storage |
+| CI/CD Running | ✅ PASS | 2 GitHub Actions workflows + Netlify auto-deploy |
+| Mobile Responsive | ✅ PASS | Breakpoints at 480px, 720px, 1100px — see screenshots below |
+| 8+ Meaningful Commits | ✅ PASS | 15+ commits on main branch |
+| Production Ready | ✅ PASS | Live at [origincheck.netlify.app](https://origincheck.netlify.app) |
+| Advanced Contract | ✅ PASS | Multi-sig, `require_auth`, events, persistent storage |
+| 30+ Users | ✅ PASS | Supabase DB + [user spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
 
 ---
 
 ## Screenshots
 
-### Desktop — Product Registration & Verification
+### Desktop
 
 <div align="center">
 
-| Main Dashboard | Registration Success |
+| Main Dashboard | Register Product |
 |---|---|
-| ![Dashboard](Screen%20Recordings/Screenshot%202026-04-23%20015532.png) | ![Registration](Screen%20Recordings/Screenshot%202026-04-23%20015553.png) |
+| ![Dashboard](Screen%20Recordings/Screenshot%202026-04-23%20015532.png) | ![Register](Screen%20Recordings/Screenshot%202026-04-23%20015553.png) |
 
 | Verify Product | Genuine Result |
 |---|---|
 | ![Verify](Screen%20Recordings/Screenshot%202026-04-23%20015718.png) | ![Genuine](Screen%20Recordings/Screenshot%202026-04-23%20015848.png) |
 
-| Transaction History | Full Workflow |
+| Transaction History | Latest Build |
 |---|---|
-| ![History](Screen%20Recordings/Screenshot%202026-04-23%20015907.png) | ![Workflow](Screen%20Recordings/Screenshot%202026-04-23%20015927.png) |
-
-| Latest Production Build |
-|---|
-| ![Latest](Screen%20Recordings/Screenshot%202026-04-26%20054012.png) |
+| ![History](Screen%20Recordings/Screenshot%202026-04-23%20015907.png) | ![Build](Screen%20Recordings/Screenshot%202026-04-26%20054012.png) |
 
 </div>
 
----
-
-### 📱 Mobile Responsive Design
-
-The app is fully optimised for mobile devices with touch-friendly buttons, responsive layouts, and proper text scaling across all screen sizes.
+### Mobile
 
 <div align="center">
 
-| Mobile View 1 | Mobile View 2 | Mobile View 3 |
+| View 1 | View 2 | View 3 |
 |---|---|---|
-| ![Mobile 1](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM.jpeg) | ![Mobile 2](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(1).jpeg) | ![Mobile 3](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(2).jpeg) |
+| ![m1](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM.jpeg) | ![m2](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(1).jpeg) | ![m3](Screen%20Recordings/WhatsApp%20Image%202026-04-28%20at%201.46.10%20AM%20(2).jpeg) |
 
 </div>
 
-**Responsive breakpoints:**
-- `< 480px` — single column, compact buttons, hidden labels
-- `480px – 720px` — medium sizing, touch-friendly targets (44px min)
-- `> 720px` — full two-column grid layout
-
-### 🎥 Demo Video
+### Demo Video
 
 <video width="100%" controls>
   <source src="Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4" type="video/mp4">
 </video>
 
-> GitHub may not render the video inline. [Download it here](Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4) or clone the repo to watch locally.
+> GitHub may not render the video inline. [Download here](Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4) or clone the repo to watch locally.
 
 ---
 
-## Features
+## Architecture
 
-| Feature | Description |
-|---|---|
-| 📦 Product Registration | Register products on-chain with Freighter wallet signature |
-| 🔍 Instant Verification | Verify authenticity by Product ID — no wallet needed |
-| 📜 Transaction History | Last 10 registrations with Stellar Explorer links |
-| 🔗 Wallet Management | Connect / disconnect Freighter seamlessly |
-| 📱 Mobile Responsive | Optimised for all screen sizes |
-| ⚠️ Network Guard | Auto-detects wrong network and warns the user |
-| 🛡️ Error Recovery | Graceful RPC error handling — no raw errors shown to users |
+```
+┌─────────────────────────────────────────────────────┐
+│                     User (Browser)                  │
+│  AuthPage → Login/Signup (Supabase)                 │
+│  Seller: Register Product → Freighter Wallet Sign   │
+│  Customer: Verify Product → Approve Product         │
+└────────────────────┬────────────────────────────────┘
+                     │
+         ┌───────────▼───────────┐
+         │    React + Vite       │
+         │  (Netlify Hosted)     │
+         │                       │
+         │  components/          │
+         │  ├─ AuthPage          │
+         │  ├─ Dashboard         │
+         │  ├─ AddProduct        │
+         │  ├─ VerifyProduct     │
+         │  └─ TransactionHistory│
+         │                       │
+         │  utils/               │
+         │  ├─ contract.js       │
+         │  ├─ freighter.js      │
+         │  ├─ indexer.js        │
+         │  └─ auth.js           │
+         └──────┬────────┬───────┘
+                │        │
+    ┌───────────▼──┐  ┌──▼──────────────┐
+    │   Supabase   │  │  Stellar Testnet │
+    │  (User DB)   │  │  Soroban Contract│
+    │  30+ users   │  │  Products stored │
+    └──────────────┘  └─────────────────┘
+```
 
----
-
-## Tech Stack
+### Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -95,9 +102,70 @@ The app is fully optimised for mobile devices with touch-friendly buttons, respo
 | Blockchain | Stellar Testnet |
 | Frontend | React 18 · Vite 5 |
 | Wallet | Freighter Extension (v3 API) |
-| SDK | @stellar/stellar-sdk v13 |
+| User Database | Supabase (Postgres) |
 | CI/CD | GitHub Actions + Netlify |
-| Styling | Custom CSS — mobile-first |
+
+### Contract Functions
+
+| Function | Type | Description |
+|---|---|---|
+| `add_product(manufacturer, name, brand)` | Write | Register product, returns ID |
+| `approve_product(approver, product_id)` | Write | Add approval; auto-verifies at 2 |
+| `get_product(id)` | Read | Fetch product with approval status |
+| `verify_product(id)` | Read | Returns `true` if product exists |
+| `get_product_count()` | Read | Total registered products |
+
+### Security
+
+| Layer | Implementation |
+|---|---|
+| Contract auth | `require_auth()` on every write function |
+| Duplicate approvals | Contract panics with `"Already approved"` |
+| Input validation | Empty field checks, numeric ID validation, maxLength |
+| Network guard | UI warns if Freighter is on Mainnet |
+| Error handling | All RPC calls wrapped in try/catch — no raw errors shown |
+
+### Data Flow
+
+```
+Seller registers product
+        ↓
+Freighter wallet popup → user signs
+        ↓
+Transaction submitted to Stellar Testnet
+        ↓
+Product stored on-chain with ID
+        ↓
+Buyer enters Product ID → verify
+        ↓
+Community approves (2 wallets needed)
+        ↓
+Product marked "Verified by Network ✅"
+```
+
+---
+
+## CI/CD Pipeline
+
+### GitHub Actions — CI (`ci.yml`)
+Runs on every push and pull request to `main`.
+```
+push / PR  →  checkout  →  Node 20  →  npm ci  →  npm run build  →  upload dist/
+```
+
+### GitHub Actions — CD (`deploy.yml`)
+Runs on push to `main` or manual trigger.
+```
+push to main  →  checkout  →  Node 20  →  npm ci  →  npm run build  →  deploy to Netlify
+```
+
+### Netlify (`netlify.toml`)
+```toml
+[build]
+  base    = "frontend"
+  command = "npm run build"
+  publish = "dist"
+```
 
 ---
 
@@ -105,11 +173,9 @@ The app is fully optimised for mobile devices with touch-friendly buttons, respo
 
 | | |
 |---|---|
-| **Network** | Stellar Testnet |
-| **Contract ID** | `CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6` |
-| **RPC Endpoint** | `https://soroban-testnet.stellar.org` |
-| **Explorer** | [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6) |
-| **Status** | ✅ Active |
+| Network | Stellar Testnet |
+| Contract ID | `CDRF3WAWOYS6YQFHLYE3PYIMURYMTV6NXSB4OUQISFTITYB2D3UB2U6J` |
+| Explorer | [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDRF3WAWOYS6YQFHLYE3PYIMURYMTV6NXSB4OUQISFTITYB2D3UB2U6J) |
 
 ---
 
@@ -117,213 +183,86 @@ The app is fully optimised for mobile devices with touch-friendly buttons, respo
 
 ```
 verifyX/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml          # CI  — build on every push / PR
-│       └── deploy.yml      # CD  — deploy to Netlify on main
-│
+├── .github/workflows/
+│   ├── ci.yml              # Build on every push/PR
+│   └── deploy.yml          # Deploy to Netlify on main
 ├── contract/
-│   ├── src/lib.rs          # Soroban smart contract (Rust)
-│   ├── Cargo.toml
-│   └── Cargo.lock
-│
+│   └── src/lib.rs          # Soroban smart contract
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── AddProduct.jsx
-│   │   │   ├── VerifyProduct.jsx
-│   │   │   ├── TransactionHistory.jsx
-│   │   │   ├── WalletConnect.jsx
-│   │   │   ├── DisconnectModal.jsx
-│   │   │   └── NetworkBanner.jsx
-│   │   ├── utils/
-│   │   │   ├── contract.js     # Soroban interactions
-│   │   │   └── freighter.js    # Wallet integration
-│   │   ├── styles/App.css
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── public/favicon.svg
+│   │   ├── components/     # AuthPage, Dashboard, AddProduct, VerifyProduct…
+│   │   ├── utils/          # contract.js, freighter.js, indexer.js, auth.js
+│   │   └── styles/App.css
 │   ├── .env.example
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-│
-├── Screen Recordings/      # 7 screenshots + demo video
-├── .gitignore
-├── netlify.toml
-└── README.md
+│   └── package.json
+├── Screen Recordings/      # Screenshots + demo video
+└── netlify.toml
 ```
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- Node.js 18+
-- Rust (latest stable)
-- Stellar CLI v25+
-- [Freighter Wallet](https://freighter.app) browser extension
-
-### Run Locally
-
 ```bash
 git clone https://github.com/kunalsathe18/verifyX
 cd verifyX/frontend
-
 npm install
-cp .env.example .env
-# fill in VITE_CONTRACT_ID and VITE_RPC_URL
-
-npm run dev
-# → http://localhost:5173
+cp .env.example .env   # fill in contract ID + Supabase keys
+npm run dev            # → http://localhost:5173
 ```
 
-### Get Testnet XLM
-
-1. Open [Stellar Laboratory](https://laboratory.stellar.org/#account-creator)
-2. Paste your Freighter wallet address
-3. Click **Get test network lumens** — you'll receive 10 000 XLM
-
----
-
-## CI/CD Pipeline
-
-Three layers of automation ensure every commit is built and deployed correctly.
-
-### Layer 1 — GitHub Actions: CI (`ci.yml`)
-
-Runs on **every push and every pull request** to `main`.
-
-```
-push / pull_request
-       ↓
-Checkout → Node 20 → npm ci → npm run build → upload dist/
-```
-
-- Catches broken builds before they reach production
-- Uploads `dist/` as a downloadable artifact (7-day retention)
-- **File:** `.github/workflows/ci.yml`
-
-### Layer 2 — GitHub Actions: CD (`deploy.yml`)
-
-Runs on **push to `main`** or manual trigger from the GitHub UI.
-
-```
-push to main
-       ↓
-Checkout → Node 20 → npm ci → npm run build → deploy to Netlify
-```
-
-- Posts a deploy comment on every commit
-- Supports preview deploys on pull requests
-- **File:** `.github/workflows/deploy.yml`
-
-### Layer 3 — Netlify Auto-Deploy
-
-Netlify watches `main` directly as a fallback, configured via `netlify.toml`:
-
-```toml
-[build]
-  base    = "frontend"
-  command = "npm run build"
-  publish = "dist"
-
-[build.environment]
-  NODE_VERSION = "20"
-
-[[redirects]]
-  from   = "/*"
-  to     = "/index.html"
-  status = 200
-```
-
-### Required GitHub Secrets
-
-Go to **Settings → Secrets and variables → Actions** and add:
-
-| Secret | Where to get it |
-|---|---|
-| `VITE_CONTRACT_ID` | Your deployed contract ID |
-| `VITE_RPC_URL` | `https://soroban-testnet.stellar.org` |
-| `NETLIFY_AUTH_TOKEN` | Netlify → User Settings → Applications → Personal access tokens |
-| `NETLIFY_SITE_ID` | Netlify → Site → Site configuration → Site ID |
-
----
-
-## Smart Contract
-
-### Functions
-
-| Function | Type | Description |
-|---|---|---|
-| `add_product(manufacturer, name, brand) → u64` | Write | Register a product; returns its ID |
-| `get_product(id) → Product` | Read | Fetch full product details |
-| `verify_product(id) → bool` | Read | Returns `true` if product exists |
-| `get_product_count() → u64` | Read | Total registered products |
-
-### Key Features
-
-- **`require_auth()`** — only the manufacturer can register their product
-- **Persistent storage** — `DataKey` enum with auto-incrementing IDs
-- **Event emission** — publishes `register` events for off-chain indexing
-- **Unit tested** — all functions covered with mock auth
-
-### Deploy Your Own
-
-```bash
-cd contract
-cargo build --target wasm32-unknown-unknown --release
-
-stellar keys generate deployer --network testnet
-stellar keys fund deployer --network testnet
-
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/verifyx.wasm \
-  --source deployer \
-  --network testnet
-# → copy the returned contract ID into frontend/.env
-```
-
----
-
-## Environment Variables
+**Environment variables:**
 
 | Variable | Description |
 |---|---|
 | `VITE_CONTRACT_ID` | Deployed Soroban contract ID |
-| `VITE_RPC_URL` | Stellar RPC endpoint |
-
-Copy `frontend/.env.example` → `frontend/.env` for local development.
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| "Account not found" | Fund wallet at [Stellar Laboratory](https://laboratory.stellar.org/#account-creator) |
-| "Insufficient balance" | Each tx costs ~0.01–0.1 XLM — get more testnet XLM |
-| "Transaction cancelled" | You rejected the Freighter popup — try again and click Approve |
-| Wallet popup missing | Ensure Freighter is installed and unlocked, then refresh |
-| Wrong network warning | Open Freighter → switch to **Testnet** |
+| `VITE_RPC_URL` | `https://soroban-testnet.stellar.org` |
+| `VITE_SUPABASE_URL` | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anon key |
 
 ---
 
-## License
+## User Research & Feedback
 
-MIT — free to use for learning or commercial purposes.
+**Full responses (30+ users):** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing)
+
+### Table 1 — Registered Users (Sample of 5)
+
+| User Name | User Email | Wallet Address |
+|---|---|---|
+| Vishvajit Bhagave | vishvajitbhagave@gmail.com | `GCFBFO5ISC2JJVBXDU5GCSE73OYE7CUK4QKYBDUX4LKJQ7EH4TBDWOTR` |
+| Tanmay Tad | tadtanmay3@gmail.com | `GAYJALSDDA3QYIIQDFESHZCHNKGWV43C76Y2MSL6MZS6RCGO7YO3HTMQ` |
+| Sarthak Dhere | Sarthakdhere0217@gmail.com | `GD5DAQGVZ5LB4DEIJXSFBAN5XDZ4S5ZI4LKY4PGTAMJ3COFH2OFHAPUF` |
+| Nakul Gokave | nacoolg@gmail.com | `GCWTXNHHTV7IXIPBQKJSQEIUUNZEXJ2BJJITGQS2Z3FDTQBO6WOG3DF6` |
+| Yash Kamble | yashkamble095@gmail.com | `GBOG3XA6F6PPIAYI5G53XIQQHLZLQMC7W6BSDXQWKNYW3X2CHSRPQ4HA` |
+
+### Table 2 — User Feedback & Implementation
+
+| User Name | User Email | Wallet Address | Feedback | Commit / Action |
+|---|---|---|---|---|
+| Vishvajit Bhagave | vishvajitbhagave@gmail.com | `GCFBFO5...WOTR` | Everything is okay. Rating: 5/5 | No changes needed |
+| Tanmay Tad | tadtanmay3@gmail.com | `GAYJALS...TMQN` | No suggestion. Rating: 5/5 | No changes needed |
+| Sarthak Dhere | Sarthakdhere0217@gmail.com | `GD5DAQ...APUF` | Nice application. Rating: 4/5 | UI polish applied |
+| Nakul Gokave | nacoolg@gmail.com | `GCWTXN...DF6` | Already good. Rating: 4/5 | No changes needed |
+| Yash Kamble | yashkamble095@gmail.com | `GBOG3X...Q4HA` | All good. Rating: 5/5 | No changes needed |
+| Vedang Bahirat | vbahirat24@gmail.com | `GAYMWU...W4H` | Good Application!! Rating: 5/5 | No changes needed |
+| Omkar Jagtap | omkarjagtap2105@gmail.com | `GAF57C...AFZ` | Nice work. Rating: 5/5 | No changes needed |
+| Pranali Bahirat | bahirat.prananli22@gmail.com | `GAWOTM...GAK` | Good Work. Rating: 4/5 | Mobile layout improved |
+| Vinayak Supekar | supekar.vina@gmail.com | `GA64YO...IVP` | Great work. Rating: 5/5 | No changes needed |
+
+**Summary:** All 9 users rated 4–5 stars. UI/mobile improvements were applied based on 4-star feedback. Full 30+ responses in the [spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing).
 
 ---
 
 ## Links
 
-- **Live App:** https://origincheck.netlify.app
-- **GitHub:** https://github.com/kunalsathe18/verifyX
-- **Contract Explorer:** [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CASYEEKABVDGCDCZCGMIZPJYSQDUMDDIYR4NRNCA7NOMCX4STI3MMEL6)
-- **Soroban Docs:** https://soroban.stellar.org
-- **Freighter:** https://freighter.app
+| | |
+|---|---|
+| Live App | https://origincheck.netlify.app |
+| GitHub | https://github.com/kunalsathe18/verifyX |
+| Contract | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDRF3WAWOYS6YQFHLYE3PYIMURYMTV6NXSB4OUQISFTITYB2D3UB2U6J) |
+| User Feedback | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
 
 ---
 
-*Built with ❤️ on Stellar*
+*Built with ❤️ on Stellar · MIT License*

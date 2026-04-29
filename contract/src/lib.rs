@@ -7,7 +7,7 @@
 
 use soroban_sdk::{
     contract, contractimpl, contracttype,
-    Address, Env, String, Symbol,
+    Address, Env, String, Symbol, Vec,
 };
 
 // ─────────────────────────────────────────────
@@ -18,22 +18,20 @@ use soroban_sdk::{
 #[contracttype]
 #[derive(Clone)]
 pub struct Product {
-    /// Auto-assigned numeric ID (1-based)
-    pub id: u64,
-    /// Product name, e.g. "iPhone 15 Pro"
-    pub name: String,
-    /// Brand name, e.g. "Apple"
-    pub brand: String,
-    /// Stellar address of the seller who registered this product
+    pub id:           u64,
+    pub name:         String,
+    pub brand:        String,
     pub manufacturer: Address,
+    /// Addresses that have approved this product (multi-sig)
+    pub approvals:    Vec<Address>,
+    /// True once approvals.len() >= 2
+    pub is_verified:  bool,
 }
 
 /// Keys for persistent contract storage
 #[contracttype]
 pub enum DataKey {
-    /// Stores a Product by its ID
     Product(u64),
-    /// Running counter for auto-incrementing IDs
     ProductCount,
 }
 
@@ -48,11 +46,7 @@ pub struct VerifyXContract;
 impl VerifyXContract {
 
     // ─────────────────────────────────────────
-    // add_product
-    //
-    // Registers a new product. The `manufacturer` address
-    // must sign the transaction (enforced by require_auth).
-    // Returns the new product ID.
+    // add_product  (unchanged behaviour)
     // ─────────────────────────────────────────
     pub fn add_product(
         env: Env,
@@ -60,10 +54,8 @@ impl VerifyXContract {
         name: String,
         brand: String,
     ) -> u64 {
-        // Verify the transaction was signed by `manufacturer`
         manufacturer.require_auth();
 
-        // Read current count (0 if storage is empty)
         let count: u64 = env
             .storage()
             .persistent()
@@ -72,24 +64,23 @@ impl VerifyXContract {
 
         let new_id: u64 = count + 1;
 
-        // Build and store the product
         let product = Product {
-            id: new_id,
+            id:           new_id,
             name,
             brand,
             manufacturer,
+            approvals:    Vec::new(&env),   // NEW – starts empty
+            is_verified:  false,            // NEW – starts unverified
         };
 
         env.storage()
             .persistent()
             .set(&DataKey::Product(new_id), &product);
 
-        // Update the counter
         env.storage()
             .persistent()
             .set(&DataKey::ProductCount, &new_id);
 
-        // Emit an event for off-chain listeners
         env.events().publish(
             (Symbol::new(&env, "register"),),
             new_id,
@@ -99,10 +90,46 @@ impl VerifyXContract {
     }
 
     // ─────────────────────────────────────────
-    // get_product
+    // approve_product  (NEW)
     //
-    // Returns the Product for the given ID.
-    // Panics with "Product not found" if it doesn't exist.
+    // Any wallet can approve a product once.
+    // When approvals reach 2 the product is marked verified.
+    // ─────────────────────────────────────────
+    pub fn approve_product(env: Env, approver: Address, product_id: u64) {
+        approver.require_auth();
+
+        let mut product: Product = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Product(product_id))
+            .unwrap_or_else(|| panic!("Product not found"));
+
+        // Prevent duplicate approvals from the same address
+        for existing in product.approvals.iter() {
+            if existing == approver {
+                panic!("Already approved");
+            }
+        }
+
+        product.approvals.push_back(approver.clone());
+
+        // Auto-verify once 2 or more approvals collected
+        if product.approvals.len() >= 2 {
+            product.is_verified = true;
+        }
+
+        env.storage()
+            .persistent()
+            .set(&DataKey::Product(product_id), &product);
+
+        env.events().publish(
+            (Symbol::new(&env, "approve"),),
+            product_id,
+        );
+    }
+
+    // ─────────────────────────────────────────
+    // get_product  (unchanged – returns full struct)
     // ─────────────────────────────────────────
     pub fn get_product(env: Env, id: u64) -> Product {
         env.storage()
@@ -112,9 +139,7 @@ impl VerifyXContract {
     }
 
     // ─────────────────────────────────────────
-    // verify_product  (bonus)
-    //
-    // Returns true if the product ID exists, false otherwise.
+    // verify_product  (unchanged)
     // ─────────────────────────────────────────
     pub fn verify_product(env: Env, id: u64) -> bool {
         env.storage()
@@ -123,9 +148,7 @@ impl VerifyXContract {
     }
 
     // ─────────────────────────────────────────
-    // get_product_count
-    //
-    // Returns the total number of registered products.
+    // get_product_count  (unchanged)
     // ─────────────────────────────────────────
     pub fn get_product_count(env: Env) -> u64 {
         env.storage()
@@ -146,7 +169,7 @@ mod tests {
     #[test]
     fn test_add_and_get_product() {
         let env = Env::default();
-        env.mock_all_auths(); // skip real signatures in unit tests
+        env.mock_all_auths();
 
         let contract_id = env.register_contract(None, VerifyXContract);
         let client = VerifyXContractClient::new(&env, &contract_id);
@@ -163,6 +186,61 @@ mod tests {
         let product = client.get_product(&1u64);
         assert_eq!(product.id, 1);
         assert_eq!(product.manufacturer, seller);
+        assert_eq!(product.approvals.len(), 0);
+        assert!(!product.is_verified);
+    }
+
+    #[test]
+    fn test_approve_product() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register_contract(None, VerifyXContract);
+        let client = VerifyXContractClient::new(&env, &contract_id);
+
+        let seller   = Address::generate(&env);
+        let approver1 = Address::generate(&env);
+        let approver2 = Address::generate(&env);
+
+        client.add_product(
+            &seller,
+            &String::from_str(&env, "Galaxy S24"),
+            &String::from_str(&env, "Samsung"),
+        );
+
+        // One approval — not yet verified
+        client.approve_product(&approver1, &1u64);
+        let p = client.get_product(&1u64);
+        assert_eq!(p.approvals.len(), 1);
+        assert!(!p.is_verified);
+
+        // Second approval — now verified
+        client.approve_product(&approver2, &1u64);
+        let p2 = client.get_product(&1u64);
+        assert_eq!(p2.approvals.len(), 2);
+        assert!(p2.is_verified);
+    }
+
+    #[test]
+    #[should_panic(expected = "Already approved")]
+    fn test_duplicate_approval_rejected() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let contract_id = env.register_contract(None, VerifyXContract);
+        let client = VerifyXContractClient::new(&env, &contract_id);
+
+        let seller   = Address::generate(&env);
+        let approver = Address::generate(&env);
+
+        client.add_product(
+            &seller,
+            &String::from_str(&env, "PS5"),
+            &String::from_str(&env, "Sony"),
+        );
+
+        client.approve_product(&approver, &1u64);
+        client.approve_product(&approver, &1u64); // should panic
     }
 
     #[test]
@@ -174,18 +252,14 @@ mod tests {
         let client = VerifyXContractClient::new(&env, &contract_id);
 
         let seller = Address::generate(&env);
-
-        // ID 99 should not exist
         assert!(!client.verify_product(&99u64));
 
-        // Register one product
         client.add_product(
             &seller,
             &String::from_str(&env, "Galaxy S24"),
             &String::from_str(&env, "Samsung"),
         );
 
-        // ID 1 should now exist, ID 2 should not
         assert!(client.verify_product(&1u64));
         assert!(!client.verify_product(&2u64));
     }
@@ -199,7 +273,6 @@ mod tests {
         let client = VerifyXContractClient::new(&env, &contract_id);
 
         let seller = Address::generate(&env);
-
         assert_eq!(client.get_product_count(), 0);
 
         client.add_product(

@@ -1,6 +1,9 @@
 # Rust build output
 contract/target/
 
+# Contract test snapshots (auto-generated, not needed in repo)
+contract/test_snapshots/
+
 # Node
 frontend/node_modules/
 frontend/dist/
@@ -11,3 +14,7 @@ frontend/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -39,61 +39,6 @@ function dummyAccount() {
 }
 
 // ─────────────────────────────────────────────
-// extractProductIdFromTx - parse events to get the product ID
-// ─────────────────────────────────────────────
-async function extractProductIdFromTx(txHash) {
-  console.log("🔍 Attempting to extract product ID from transaction events...");
-  
-  try {
-    // Wait a bit for the transaction to be fully indexed
-    await new Promise(r => setTimeout(r, 3000));
-    
-    const txResult = await server.getTransaction(txHash);
-    
-    if (txResult.status === rpc.Api.GetTransactionStatus.SUCCESS) {
-      // Try to get return value from the result
-      if (txResult.returnValue) {
-        const productId = Number(scValToNative(txResult.returnValue));
-        console.log("✅ Product ID extracted from returnValue:", productId);
-        return productId;
-      }
-      
-      // Try to parse from resultMetaXdr
-      if (txResult.resultMetaXdr) {
-        const meta = txResult.resultMetaXdr;
-        if (meta.v3?.sorobanMeta?.returnValue) {
-          const productId = Number(scValToNative(meta.v3.sorobanMeta.returnValue));
-          console.log("✅ Product ID extracted from meta:", productId);
-          return productId;
-        }
-        
-        // Try to find it in events
-        if (meta.v3?.sorobanMeta?.events) {
-          for (const event of meta.v3.sorobanMeta.events) {
-            try {
-              const body = event.body?.value?.data;
-              if (body) {
-                const value = scValToNative(body);
-                if (typeof value === 'number' && value > 0) {
-                  console.log("✅ Product ID found in events:", value);
-                  return value;
-                }
-              }
-            } catch (e) {
-              // Continue checking other events
-            }
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.warn("Could not extract product ID from transaction:", err.message);
-  }
-  
-  return null;
-}
-
-// ─────────────────────────────────────────────
 // getProductCount - get total number of products
 // ─────────────────────────────────────────────
 async function getProductCount() {
@@ -532,12 +477,9 @@ export async function getProduct(id) {
       simResult = await server.simulateTransaction(tx);
     } catch (simError) {
       console.warn("Simulation error in getProduct:", simError.message);
-      
-      // Handle RPC errors gracefully
-      if (simError.message?.includes("Bad union switch") || 
+      if (simError.message?.includes("Bad union switch") ||
           simError.message?.includes("union") ||
           simError.message?.includes("parsing")) {
-        console.warn("RPC parsing error - product may not exist or network issue");
         return null;
       }
       throw simError;
@@ -545,39 +487,68 @@ export async function getProduct(id) {
 
     if (rpc.Api.isSimulationError(simResult)) {
       console.warn("Product not found or simulation error:", simResult.error);
-      return null; // product not found → show Fake
+      return null;
     }
 
     try {
       const raw = scValToNative(simResult.result.retval);
+      // approvals is a Vec<Address> on-chain; scValToNative gives an array
+      const approvals = Array.isArray(raw.approvals) ? raw.approvals : [];
       return {
-        id:           Number(raw.id),
-        name:         raw.name,
-        brand:        raw.brand,
+        id:          Number(raw.id),
+        name:        raw.name,
+        brand:       raw.brand,
         manufacturer: raw.manufacturer.toString(),
+        approvals:   approvals.map(a => a.toString()),
+        is_verified: Boolean(raw.is_verified),
       };
     } catch (parseError) {
       console.warn("Could not parse product data:", parseError.message);
-      
-      // Handle RPC parsing errors
-      if (parseError.message?.includes("Bad union switch") || 
-          parseError.message?.includes("union")) {
-        console.warn("RPC parsing error in product data");
-        return null;
-      }
       return null;
     }
   } catch (err) {
     console.warn("Error getting product:", err.message);
-    
-    // Handle RPC errors gracefully
-    if (err.message?.includes("Bad union switch") || 
-        err.message?.includes("union") ||
-        err.message?.includes("parsing")) {
-      console.warn("RPC error in getProduct - returning null");
-      return null;
-    }
     return null;
+  }
+}
+
+// ─────────────────────────────────────────────
+// approveProduct  –  write (requires wallet signature)
+// ─────────────────────────────────────────────
+export async function approveProduct(publicKey, productId) {
+  console.log("👍 Approving product:", productId, "by:", publicKey);
+
+  if (!publicKey) throw new Error("Connect your wallet first.");
+  if (!productId || isNaN(Number(productId)) || Number(productId) < 1) {
+    throw new Error("Invalid product ID.");
+  }
+
+  const operation = Operation.invokeContractFunction({
+    contract: CONTRACT_ID,
+    function: "approve_product",
+    args: [
+      new Address(publicKey).toScVal(),
+      nativeToScVal(BigInt(productId), { type: "u64" }),
+    ],
+  });
+
+  try {
+    const result = await buildAndSubmit(publicKey, operation);
+    console.log("✅ Product approved on-chain!");
+    return { txHash: result.hash || result.txHash };
+  } catch (error) {
+    console.error("❌ approveProduct error:", error);
+
+    if (error.message?.includes("Already approved")) {
+      throw new Error("You have already approved this product.");
+    }
+    if (error.message?.includes("Product not found")) {
+      throw new Error("Product not found on-chain.");
+    }
+    if (error.message?.includes("cancelled") || error.message?.includes("rejected")) {
+      throw new Error("Transaction was cancelled.");
+    }
+    throw new Error("Approval failed. Please try again.");
   }
 }
 

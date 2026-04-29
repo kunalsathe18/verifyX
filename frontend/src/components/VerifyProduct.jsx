@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { getProduct } from "../utils/contract";
+import { getProduct, approveProduct } from "../utils/contract";
+import { invalidateCache } from "../utils/indexer";
 import { shortenAddress } from "../utils/freighter";
 
-export default function VerifyProduct() {
-  const [productId, setProductId] = useState("");
-  const [result, setResult]       = useState(null);
-  const [notFound, setNotFound]   = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
+export default function VerifyProduct({ walletAddress }) {
+  const [productId,  setProductId]  = useState("");
+  const [result,     setResult]     = useState(null);
+  const [notFound,   setNotFound]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState("");
+  const [approving,  setApproving]  = useState(false);
+  const [approveMsg, setApproveMsg] = useState(null); // { type, text }
 
+  // ── Verify ────────────────────────────────────────────────
   async function handleVerify(e) {
     e.preventDefault();
 
@@ -22,42 +26,57 @@ export default function VerifyProduct() {
     setResult(null);
     setNotFound(false);
     setError("");
+    setApproveMsg(null);
 
     try {
-      console.log("🔍 Verifying product ID:", id);
       const product = await getProduct(id);
-      
       if (product) {
-        console.log("✅ Product found:", product);
         setResult(product);
       } else {
-        console.log("❌ Product not found");
         setNotFound(true);
       }
     } catch (err) {
       console.error("Verification error:", err);
-      
-      // Handle different types of errors gracefully
       if (err.message?.toLowerCase().includes("not found")) {
         setNotFound(true);
-      } else if (err.message?.includes("Bad union switch") || 
-                 err.message?.includes("union") ||
-                 err.message?.includes("parsing") ||
-                 err.message?.includes("XDR")) {
-        // Don't show technical RPC errors to users
-        setError("Network error occurred. Please try again in a moment.");
-      } else if (err.message?.includes("network") || 
-                 err.message?.includes("connection")) {
-        setError("Network connection error. Please check your connection and try again.");
-      } else if (err.message && !err.message.includes("switch") && !err.message.includes("union")) {
-        // Only show non-technical error messages
-        setError(err.message);
+      } else if (
+        err.message?.includes("Bad union switch") ||
+        err.message?.includes("union") ||
+        err.message?.includes("parsing")
+      ) {
+        setError("Network error. Please try again in a moment.");
       } else {
-        // Fallback for any other technical errors
-        setError("Unable to verify product at this time. Please try again later.");
+        setError("Unable to verify product. Please try again.");
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  // ── Approve ───────────────────────────────────────────────
+  async function handleApprove() {
+    if (!walletAddress) {
+      setApproveMsg({ type: "error", text: "Connect your wallet to approve." });
+      return;
+    }
+
+    setApproving(true);
+    setApproveMsg(null);
+
+    try {
+      await approveProduct(walletAddress, result.id);
+      invalidateCache();
+
+      // Re-fetch to show updated approval count
+      const updated = await getProduct(result.id);
+      if (updated) setResult(updated);
+
+      setApproveMsg({ type: "success", text: "✅ Approval submitted on-chain!" });
+    } catch (err) {
+      console.error("Approve error:", err);
+      setApproveMsg({ type: "error", text: err.message });
+    } finally {
+      setApproving(false);
     }
   }
 
@@ -66,8 +85,10 @@ export default function VerifyProduct() {
     setResult(null);
     setNotFound(false);
     setError("");
+    setApproveMsg(null);
   }
 
+  // ── Render ────────────────────────────────────────────────
   return (
     <div className="card">
       <h2 className="card-title">🔍 Verify a Product</h2>
@@ -78,7 +99,6 @@ export default function VerifyProduct() {
       <form onSubmit={handleVerify} className="form">
         <div className="form-group">
           <label htmlFor="verify-id">Product ID</label>
-          {/* text input avoids mobile number-spinner UI */}
           <input
             id="verify-id"
             type="text"
@@ -108,10 +128,11 @@ export default function VerifyProduct() {
 
       {error && <div className="status-box error">❌ {error}</div>}
 
-      {/* Genuine */}
+      {/* ── Genuine result ── */}
       {result && (
         <div className="result-card genuine">
           <div className="result-badge genuine-badge">✅ Genuine Product</div>
+
           <table className="result-table">
             <tbody>
               <tr>
@@ -133,20 +154,61 @@ export default function VerifyProduct() {
                 </td>
               </tr>
               <tr>
-                <td className="result-label">Status</td>
+                <td className="result-label">Approvals</td>
                 <td className="result-value">
-                  <span className="badge-genuine">Genuine ✅</span>
+                  <span className="approval-count">
+                    {result.approvals?.length ?? 0} / 2
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td className="result-label">Network Status</td>
+                <td className="result-value">
+                  {result.is_verified ? (
+                    <span className="badge-verified">Verified by Network ✅</span>
+                  ) : (
+                    <span className="badge-pending">Pending Approval ⏳</span>
+                  )}
                 </td>
               </tr>
             </tbody>
           </table>
+
+          {/* Approve button */}
+          {!result.is_verified && (
+            <div className="approve-section">
+              <button
+                className="btn btn-approve"
+                onClick={handleApprove}
+                disabled={approving || !walletAddress}
+              >
+                {approving ? (
+                  <span className="btn-loading">
+                    <span className="spinner" /> Approving…
+                  </span>
+                ) : (
+                  "👍 Approve Product"
+                )}
+              </button>
+              {!walletAddress && (
+                <p className="hint-text">Connect wallet to approve.</p>
+              )}
+            </div>
+          )}
+
+          {approveMsg && (
+            <div className={`status-box ${approveMsg.type}`}>
+              {approveMsg.text}
+            </div>
+          )}
+
           <button className="btn-reset" onClick={handleReset}>
             Verify another product
           </button>
         </div>
       )}
 
-      {/* Fake */}
+      {/* ── Not found ── */}
       {notFound && (
         <div className="result-card fake">
           <div className="result-badge fake-badge">❌ Not Found</div>
