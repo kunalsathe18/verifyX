@@ -52,10 +52,10 @@ A blockchain-based product authenticity platform built on Stellar. Sellers regis
 ### Demo Video
 
 <video width="100%" controls>
-  <source src="Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4" type="video/mp4">
+  <source src="Screen%20Recordings/20260430-0925-12.2390959.mp4" type="video/mp4">
 </video>
 
-> GitHub may not render the video inline. [Download here](Screen%20Recordings/Screen%20Recording%202026-04-23%20030939.mp4) or clone the repo to watch locally.
+> GitHub may not render the video inline. [Download here](Screen%20Recordings/20260430-0925-12.2390959.mp4) or clone the repo to watch locally.
 
 ---
 
