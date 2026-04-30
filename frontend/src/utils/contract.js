@@ -39,8 +39,37 @@ function dummyAccount() {
 }
 
 // ─────────────────────────────────────────────
-// getProductCount - get total number of products
+// isRpcParseError — detects transient RPC XDR errors
 // ─────────────────────────────────────────────
+function isRpcParseError(msg = "") {
+  return (
+    msg.includes("Bad union switch") ||
+    msg.includes("union switch") ||
+    msg.includes("XDR") ||
+    msg.includes("parsing")
+  );
+}
+
+// ─────────────────────────────────────────────
+// simulateWithRetry — retries up to 3 times on RPC parse errors
+// ─────────────────────────────────────────────
+async function simulateWithRetry(tx, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const result = await server.simulateTransaction(tx);
+      return result;
+    } catch (err) {
+      const isLast = i === retries - 1;
+      if (isRpcParseError(err.message)) {
+        if (isLast) throw err;
+        console.warn(`⚠️ RPC parse error on simulation attempt ${i + 1}, retrying...`);
+        await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+      } else {
+        throw err; // non-RPC error — don't retry
+      }
+    }
+  }
+}
 async function getProductCount() {
   try {
     const tx = new TransactionBuilder(dummyAccount(), {
@@ -135,25 +164,28 @@ async function buildAndSubmit(publicKey, operation) {
     .setTimeout(60)
     .build();
 
-  // Simulate
+  // Simulate with retry — handles transient "Bad union switch" RPC errors
   let simResult;
   try {
-    simResult = await server.simulateTransaction(builtTx);
-    
+    simResult = await simulateWithRetry(builtTx);
+
     if (rpc.Api.isSimulationError(simResult)) {
       console.error("❌ Simulation error:", simResult.error);
       throw new Error(`Contract simulation failed: ${simResult.error}`);
     }
-    
+
     console.log("✅ [2/6] Simulation successful");
-    console.log("📊 Simulation details:", {
-      cost: simResult.cost,
-      minResourceFee: simResult.minResourceFee,
-      hasTransactionData: !!simResult.transactionData
-    });
-    
   } catch (simError) {
     console.error("❌ [2/6] Simulation failed:", simError.message);
+
+    // "Bad union switch" is a transient Stellar RPC bug.
+    // After retries it still fails — surface a clear message.
+    if (isRpcParseError(simError.message)) {
+      throw new Error(
+        "The Stellar RPC server returned a temporary error. Please wait 10 seconds and try again."
+      );
+    }
+
     throw new Error(`Simulation failed: ${simError.message}`);
   }
 

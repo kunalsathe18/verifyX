@@ -80,11 +80,19 @@ export default function AddProduct({ walletAddress }) {
       
       // Filter out technical RPC errors and show user-friendly messages
       let userMessage = "Registration failed. Please try again.";
-      
-      if (err.message?.includes("User rejected") || 
+
+      if (err.message?.includes("User rejected") ||
           err.message?.includes("denied") ||
           err.message?.includes("cancelled")) {
         userMessage = "Transaction was cancelled. Please try again when ready.";
+      } else if (err.message?.includes("temporary error") ||
+                 err.message?.includes("wait 10 seconds")) {
+        userMessage = "The Stellar network returned a temporary error. Please wait 10 seconds and try again.";
+      } else if (err.message?.includes("Bad union switch") ||
+                 err.message?.includes("union") ||
+                 err.message?.includes("parsing") ||
+                 err.message?.includes("XDR")) {
+        userMessage = "Temporary network error. Please wait a moment and try again.";
       } else if (err.message?.includes("Transaction failed") ||
                  err.message?.includes("insufficient balance") ||
                  err.message?.includes("authorization")) {
