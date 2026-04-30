@@ -29,14 +29,18 @@ export default function VerifyProduct({ walletAddress }) {
     setApproveMsg(null);
 
     try {
+      console.log("🔍 Verifying product ID:", id);
       const product = await getProduct(id);
+      console.log("📦 Product data:", product);
+      
       if (product) {
         setResult(product);
       } else {
+        console.warn("⚠️ Product not found on blockchain");
         setNotFound(true);
       }
     } catch (err) {
-      console.error("Verification error:", err);
+      console.error("❌ Verification error:", err);
       if (err.message?.toLowerCase().includes("not found")) {
         setNotFound(true);
       } else if (
@@ -60,21 +64,92 @@ export default function VerifyProduct({ walletAddress }) {
       return;
     }
 
+    // Check if product exists before approving
+    if (!result || !result.id) {
+      setApproveMsg({ type: "error", text: "No product loaded. Please verify a product first." });
+      return;
+    }
+
+    console.log("👍 Attempting to approve product:", result.id);
+    console.log("👤 Approver wallet:", walletAddress);
+    console.log("📊 Current approvals:", result.approvals);
+    console.log("📊 Approvals array type:", typeof result.approvals, Array.isArray(result.approvals));
+
+    // Check if user already approved - normalize addresses for comparison
+    if (result.approvals && Array.isArray(result.approvals)) {
+      const normalizedWallet = walletAddress.trim().toUpperCase();
+      const alreadyApproved = result.approvals.some(addr => {
+        const normalizedAddr = String(addr).trim().toUpperCase();
+        console.log("🔍 Comparing:", normalizedAddr, "===", normalizedWallet, "?", normalizedAddr === normalizedWallet);
+        return normalizedAddr === normalizedWallet;
+      });
+      
+      if (alreadyApproved) {
+        console.log("⚠️ User already approved this product");
+        setApproveMsg({ type: "error", text: "You have already approved this product." });
+        return;
+      }
+    }
+
     setApproving(true);
     setApproveMsg(null);
 
     try {
+      // Double-check product still exists before approving
+      console.log("🔍 Verifying product exists before approval...");
+      const currentProduct = await getProduct(result.id);
+      
+      if (!currentProduct) {
+        setApproveMsg({ 
+          type: "error", 
+          text: "This product no longer exists on the blockchain. It may have been removed or the contract was redeployed." 
+        });
+        setApproving(false);
+        return;
+      }
+
+      // Check again if user already approved (in case of race condition)
+      if (currentProduct.approvals && Array.isArray(currentProduct.approvals)) {
+        const normalizedWallet = walletAddress.trim().toUpperCase();
+        const alreadyApproved = currentProduct.approvals.some(addr => 
+          String(addr).trim().toUpperCase() === normalizedWallet
+        );
+        
+        if (alreadyApproved) {
+          setApproveMsg({ type: "error", text: "You have already approved this product." });
+          setResult(currentProduct); // Update with latest data
+          setApproving(false);
+          return;
+        }
+      }
+
+      console.log("✅ Product exists, proceeding with approval...");
       await approveProduct(walletAddress, result.id);
       invalidateCache();
 
       // Re-fetch to show updated approval count
       const updated = await getProduct(result.id);
-      if (updated) setResult(updated);
+      if (updated) {
+        console.log("✅ Product updated after approval:", updated);
+        setResult(updated);
+      }
 
       setApproveMsg({ type: "success", text: "✅ Approval submitted on-chain!" });
     } catch (err) {
-      console.error("Approve error:", err);
-      setApproveMsg({ type: "error", text: err.message });
+      console.error("❌ Approve error:", err);
+      
+      // Provide more specific error messages
+      let errorMessage = err.message;
+      
+      if (err.message?.includes("Product not found")) {
+        errorMessage = "This product no longer exists on the blockchain. It may have been removed or the contract was redeployed.";
+      } else if (err.message?.includes("Already approved")) {
+        errorMessage = "You have already approved this product.";
+      } else if (err.message?.includes("UnreachableCodeReached") || err.message?.includes("InvalidAction")) {
+        errorMessage = "Contract error: This product may not exist on the blockchain. Please verify the product ID is correct.";
+      }
+      
+      setApproveMsg({ type: "error", text: errorMessage });
     } finally {
       setApproving(false);
     }

@@ -521,16 +521,26 @@ export async function getProduct(id) {
 
     try {
       const raw = scValToNative(simResult.result.retval);
+      console.log("📦 Raw product data from contract:", raw);
+      
       // approvals is a Vec<Address> on-chain; scValToNative gives an array
       const approvals = Array.isArray(raw.approvals) ? raw.approvals : [];
-      return {
+      console.log("📋 Raw approvals:", approvals);
+      
+      const approvalsStrings = approvals.map(a => a.toString());
+      console.log("📋 Approvals as strings:", approvalsStrings);
+      
+      const product = {
         id:          Number(raw.id),
         name:        raw.name,
         brand:       raw.brand,
         manufacturer: raw.manufacturer.toString(),
-        approvals:   approvals.map(a => a.toString()),
+        approvals:   approvalsStrings,
         is_verified: Boolean(raw.is_verified),
       };
+      
+      console.log("✅ Parsed product:", product);
+      return product;
     } catch (parseError) {
       console.warn("Could not parse product data:", parseError.message);
       return null;
@@ -568,6 +578,20 @@ export async function approveProduct(publicKey, productId) {
   } catch (error) {
     console.error("❌ approveProduct error:", error);
 
+    // Check for specific contract errors
+    if (error.message?.includes("UnreachableCodeReached") || 
+        error.message?.includes("InvalidAction")) {
+      // This means the contract panicked - likely product not found or already approved
+      console.error("Contract panic detected - checking error details");
+      
+      if (error.message?.includes("Already approved")) {
+        throw new Error("You have already approved this product.");
+      }
+      
+      // Default to product not found since that's the most common cause
+      throw new Error("Product not found on blockchain. Please verify the product ID is correct.");
+    }
+    
     if (error.message?.includes("Already approved")) {
       throw new Error("You have already approved this product.");
     }
