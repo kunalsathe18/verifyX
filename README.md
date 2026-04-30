@@ -153,19 +153,34 @@ Runs on every push and pull request to `main`.
 push / PR  →  checkout  →  Node 20  →  npm ci  →  npm run build  →  upload dist/
 ```
 
-### GitHub Actions — CD (`deploy.yml`)
-Runs on push to `main` or manual trigger.
+### Vercel Deployment
+Automatic deployment via Vercel Git integration.
 ```
-push to main  →  checkout  →  Node 20  →  npm ci  →  npm run build  →  deploy to Netlify
+push to main  →  Vercel detects change  →  build frontend  →  deploy to production
 ```
 
-### Netlify (`netlify.toml`)
-```toml
-[build]
-  base    = "frontend"
-  command = "npm run build"
-  publish = "dist"
+### Vercel Configuration (`vercel.json`)
+```json
+{
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
 ```
+
+**To deploy to Vercel:**
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import this repository
+3. Add environment variables: `VITE_CONTRACT_ID`, `VITE_RPC_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+4. Deploy
+
+See `VERCEL_DEPLOYMENT.md` for detailed instructions.
 
 ---
 
