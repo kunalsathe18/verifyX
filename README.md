@@ -2,7 +2,7 @@
 
 A blockchain-based product authenticity platform built on Stellar. Sellers register products on-chain, the community approves them via multi-signature, and buyers verify authenticity instantly — no middlemen, no fakes.
 
-**Live Demo:** [https://origincheck.netlify.app](https://origincheck.netlify.app)
+**Live Demo:** [https://verify-x-seven.vercel.app](https://verify-x-seven.vercel.app)
 
 ---
 
@@ -10,10 +10,10 @@ A blockchain-based product authenticity platform built on Stellar. Sellers regis
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| CI/CD Running | ✅ PASS | 2 GitHub Actions workflows + Netlify auto-deploy |
+| CI/CD Running | ✅ PASS | 2 GitHub Actions workflows + Vercel auto-deploy |
 | Mobile Responsive | ✅ PASS | Breakpoints at 480px, 720px, 1100px — see screenshots below |
 | 8+ Meaningful Commits | ✅ PASS | 15+ commits on main branch |
-| Production Ready | ✅ PASS | Live at [origincheck.netlify.app](https://origincheck.netlify.app) |
+| Production Ready | ✅ PASS | Live at [verify-x-seven.vercel.app](https://verify-x-seven.vercel.app) |
 | Advanced Contract | ✅ PASS | Multi-sig, `require_auth`, events, persistent storage |
 | 30+ Users | ✅ PASS | Supabase DB + [user spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
 
@@ -71,7 +71,7 @@ A blockchain-based product authenticity platform built on Stellar. Sellers regis
                      │
          ┌───────────▼───────────┐
          │    React + Vite       │
-         │  (Netlify Hosted)     │
+         │  (Vercel Hosted)      │
          │                       │
          │  components/          │
          │  ├─ AuthPage          │
@@ -103,7 +103,7 @@ A blockchain-based product authenticity platform built on Stellar. Sellers regis
 | Frontend | React 18 · Vite 5 |
 | Wallet | Freighter Extension (v3 API) |
 | User Database | Supabase (Postgres) |
-| CI/CD | GitHub Actions + Netlify |
+| CI/CD | GitHub Actions + Vercel |
 
 ### Contract Functions
 
@@ -180,8 +180,6 @@ push to main  →  Vercel detects change  →  build frontend  →  deploy to pr
 3. Add environment variables: `VITE_CONTRACT_ID`, `VITE_RPC_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 4. Deploy
 
-See `VERCEL_DEPLOYMENT.md` for detailed instructions.
-
 ---
 
 ## Deployed Contract
@@ -199,8 +197,7 @@ See `VERCEL_DEPLOYMENT.md` for detailed instructions.
 ```
 verifyX/
 ├── .github/workflows/
-│   ├── ci.yml              # Build on every push/PR
-│   └── deploy.yml          # Deploy to Netlify on main
+│   └── ci.yml              # Build on every push/PR
 ├── contract/
 │   └── src/lib.rs          # Soroban smart contract
 ├── frontend/
@@ -211,7 +208,7 @@ verifyX/
 │   ├── .env.example
 │   └── package.json
 ├── Screen Recordings/      # Screenshots + demo video
-└── netlify.toml
+└── vercel.json             # Vercel deployment config
 ```
 
 ---
@@ -273,7 +270,7 @@ npm run dev            # → http://localhost:5173
 
 | | |
 |---|---|
-| Live App | https://origincheck.netlify.app |
+| Live App | https://verify-x-seven.vercel.app |
 | GitHub | https://github.com/kunalsathe18/verifyX |
 | Contract | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDRF3WAWOYS6YQFHLYE3PYIMURYMTV6NXSB4OUQISFTITYB2D3UB2U6J) |
 | User Feedback | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
