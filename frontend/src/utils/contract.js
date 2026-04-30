@@ -100,16 +100,13 @@ async function buildAndSubmit(publicKey, operation) {
     account = await server.getAccount(publicKey);
     console.log(`✅ [1/6] Account fetched, sequence:`, account.sequence);
     
-    // Check account balance
-    const xlmBalance = account.balances.find(b => b.asset_type === 'native');
+    // Check account balance safely
+    const xlmBalance = account.balances?.find(b => b.asset_type === 'native');
     if (xlmBalance) {
       console.log("💰 XLM Balance:", xlmBalance.balance);
       const balance = parseFloat(xlmBalance.balance);
-      if (balance < 1) {
-        console.warn("⚠️ Low XLM balance - may cause transaction failures");
-        if (balance < 0.1) {
-          throw new Error("Insufficient XLM balance. Please fund your wallet with testnet XLM from https://laboratory.stellar.org/#account-creator");
-        }
+      if (balance < 0.1) {
+        throw new Error("Insufficient XLM balance. Please fund your wallet at https://laboratory.stellar.org/#account-creator");
       }
     }
   } catch (accountError) {
