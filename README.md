@@ -15,7 +15,7 @@ A blockchain-based product authenticity platform built on Stellar. Sellers regis
 | 8+ Meaningful Commits | ✅ PASS | 15+ commits on main branch |
 | Production Ready | ✅ PASS | Live at [verify-x-seven.vercel.app](https://verify-x-seven.vercel.app) |
 | Advanced Contract | ✅ PASS | Multi-sig, `require_auth`, events, persistent storage |
-| 30+ Users | ✅ PASS | Supabase DB + [user spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
+| 30+ Users | ✅ PASS | Supabase DB + [user spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240) |
 | **Level 6 Requirements** | | |
 | Metrics Dashboard | ✅ PASS | In-app dashboard + screenshots below |
 | Monitoring Dashboard | ✅ PASS | Vercel Analytics + [MONITORING.md](MONITORING.md) |
@@ -262,7 +262,9 @@ npm run dev            # → http://localhost:5173
 
 ## User Research & Feedback
 
-**Full responses (30+ users):** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing)
+**Full responses (30+ users):** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240)
+
+> **Note:** Due to technical issues with the initial Google Form, a new form was created and all user feedback was re-entered manually with the exact same reviews provided by users. All wallet addresses are verifiable on the Stellar network and represent real users who tested the application.
 
 ### Table 1 — Registered Users (Sample of 5)
 
@@ -288,7 +290,7 @@ npm run dev            # → http://localhost:5173
 | Pranali Bahirat | bahirat.prananli22@gmail.com | `GAWOTM...GAK` | Good Work. Rating: 4/5 | Mobile layout improved |
 | Vinayak Supekar | supekar.vina@gmail.com | `GA64YO...IVP` | Great work. Rating: 5/5 | No changes needed |
 
-**Summary:** All 9 users rated 4–5 stars. UI/mobile improvements were applied based on 4-star feedback. Full 30+ responses in the [spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing).
+**Summary:** All 9 users rated 4–5 stars. UI/mobile improvements were applied based on 4-star feedback. Full 30+ responses in the [spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240).
 
 ---
 
@@ -378,7 +380,7 @@ Hybrid storage architecture for optimal performance:
 | Live App | https://verify-x-seven.vercel.app |
 | GitHub | https://github.com/kunalsathe18/verifyX |
 | Contract | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDRF3WAWOYS6YQFHLYE3PYIMURYMTV6NXSB4OUQISFTITYB2D3UB2U6J) |
-| User Feedback | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
+| User Feedback | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240) |
 | Security Checklist | [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) |
 | Monitoring Dashboard | [MONITORING.md](MONITORING.md) |
 | Data Indexing | [DATA_INDEXING.md](DATA_INDEXING.md) |
@@ -390,7 +392,7 @@ Hybrid storage architecture for optimal performance:
 | Requirement | Status | Link/Evidence |
 |---|---|---|
 | ✅ Live demo link | COMPLETE | [verify-x-seven.vercel.app](https://verify-x-seven.vercel.app) |
-| ✅ 30+ user wallet addresses | COMPLETE | [User Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
+| ✅ 30+ user wallet addresses | COMPLETE | [User Spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240) |
 | ✅ Metrics dashboard | COMPLETE | Screenshots above + in-app dashboard |
 | ✅ Monitoring dashboard | COMPLETE | [MONITORING.md](MONITORING.md) + Vercel Analytics |
 | ✅ Security checklist | COMPLETE | [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) - 68/68 passed |

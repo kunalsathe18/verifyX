@@ -5,7 +5,7 @@
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
 | 1 | Live demo link | ✅ COMPLETE | https://verify-x-seven.vercel.app |
-| 2 | 30+ user wallet addresses | ✅ COMPLETE | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing) |
+| 2 | 30+ user wallet addresses | ✅ COMPLETE | [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240) |
 | 3 | Metrics dashboard screenshot | ✅ COMPLETE | See README Screenshots section |
 | 4 | Monitoring dashboard | ✅ COMPLETE | [MONITORING.md](MONITORING.md) |
 | 5 | Security checklist | ✅ COMPLETE | [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) |
@@ -38,13 +38,23 @@
 ---
 
 ### 2. 30+ User Wallet Addresses
-**Evidence:** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1yzMdzSmkJxzERzZM6oYzkIceyxxSDrCyXWIHMFHjkp8/edit?usp=sharing)
+**Evidence:** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1u8ZYblyU0b5-WJC5pi47ZOiJYVS99-18JaYJuID8a0g/edit?resourcekey=&gid=1240034240#gid=1240034240)
+
+**Important Note:**  
+Due to technical issues with the initial Google Form, a new form was created and all user feedback was manually re-entered with the exact same reviews provided by the original users. This ensures data integrity while resolving the form access issues.
 
 **Statistics:**
 - Total Users: 33+
 - Sellers: 15+
 - Customers: 18+
 - User Satisfaction: 4.5/5 average rating
+
+**Verification:**  
+All wallet addresses are verifiable on the Stellar Testnet Explorer. Each address represents a real user who:
+1. Signed up for the application
+2. Connected their Freighter wallet
+3. Tested the product registration/verification features
+4. Provided feedback on their experience
 
 **Sample Wallet Addresses (Verifiable on Stellar Explorer):**
 1. `GCFBFO5ISC2JJVBXDU5GCSE73OYE7CUK4QKYBDUX4LKJQ7EH4TBDWOTR`
@@ -53,7 +63,8 @@
 4. `GCWTXNHHTV7IXIPBQKJSQEIUUNZEXJ2BJJITGQS2Z3FDTQBO6WOG3DF6`
 5. `GBOG3XA6F6PPIAYI5G53XIQQHLZLQMC7W6BSDXQWKNYW3X2CHSRPQ4HA`
 
-All addresses verifiable at: https://stellar.expert/explorer/testnet
+**Verification Link:** https://stellar.expert/explorer/testnet  
+Simply search for any wallet address above to verify it exists on the Stellar Testnet and has transaction history.
 
 ---
 
